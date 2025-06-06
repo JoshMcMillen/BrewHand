@@ -1,0 +1,227 @@
+{
+  "name": "brewhand",
+  "displayName": "BrewHand",
+  "description": "Enhances GitHub Copilot with 'do it right the first time' philosophy",
+  "version": "1.0.0",
+  "publisher": "your-publisher-name",
+  "engines": {
+    "vscode": "^1.93.0"
+  },
+  "categories": [
+    "AI",
+    "Programming Languages",
+    "Linters"
+  ],
+  "keywords": [
+    "brewhand",
+    "copilot",
+    "ai",
+    "code quality",
+    "best practices",
+    "architecture"
+  ],
+  "activationEvents": [
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:python",
+    "onLanguage:java",
+    "onLanguage:csharp",
+    "onLanguage:go",
+    "onLanguage:rust"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "chatParticipants": [
+      {
+        "id": "brewhand",
+        "fullName": "BrewHand Developer",
+        "name": "brewhand",
+        "description": "AI assistant focused on production-ready, high-quality code generation",
+        "isSticky": true
+      }
+    ],
+    "commands": [
+      {
+        "command": "brewhand.enhanceSelection",
+        "title": "Enhance Selected Code",
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.generateWithQuality",
+        "title": "Generate Quality Code",
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.reviewCode",
+        "title": "Review Code Quality",
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.showUsageDashboard",
+        "title": "Show Usage Dashboard",
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.resetUsage",
+        "title": "Reset Monthly Usage",
+        "category": "BrewHand"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "brewhand.enhanceSelection",
+          "when": "editorHasSelection",
+          "group": "brewhand"
+        },
+        {
+          "command": "brewhand.reviewCode",
+          "group": "brewhand"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "brewhand.enhanceSelection",
+          "when": "editorIsOpen"
+        },
+        {
+          "command": "brewhand.generateWithQuality",
+          "when": "editorIsOpen"
+        },
+        {
+          "command": "brewhand.reviewCode",
+          "when": "editorIsOpen"
+        },
+        {
+          "command": "brewhand.showUsageDashboard"
+        },
+        {
+          "command": "brewhand.resetUsage"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "brewhand.enhanceSelection",
+        "key": "ctrl+shift+q",
+        "mac": "cmd+shift+q",
+        "when": "editorTextFocus && editorHasSelection"
+      },
+      {
+        "command": "brewhand.generateWithQuality",
+        "key": "ctrl+shift+g",
+        "mac": "cmd+shift+g",
+        "when": "editorTextFocus"
+      }
+    ],
+    "configuration": {
+      "title": "BrewHand",
+      "properties": {
+        "brewhand.defaultModel": {
+          "type": "string",
+          "default": "auto",
+          "enum": [
+            "auto",
+            "claude-opus-4",
+            "claude-sonnet-4",
+            "claude-3.7-sonnet",
+            "claude-3.7-sonnet-thinking",
+            "claude-3.5-sonnet",
+            "gpt-4.5",
+            "gpt-4.1",
+            "gpt-4o",
+            "o3",
+            "o3-mini",
+            "o4-mini",
+            "o1-preview",
+            "o1-mini",
+            "o1",
+            "gemini-2.5-pro",
+            "gemini-2.0-flash",
+            "gemini-1.5-pro"
+          ],
+          "description": "Default LLM model preference (auto-selects best available for your subscription)"
+        },
+        "brewhand.strictMode": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable strict quality requirements (no TODO comments, comprehensive error handling)"
+        },
+        "brewhand.includeTests": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically generate test suggestions with code"
+        },
+        "brewhand.architecturalFocus": {
+          "type": "string",
+          "default": "balanced",
+          "enum": [
+            "performance",
+            "maintainability",
+            "security",
+            "scalability",
+            "balanced"
+          ],
+          "description": "Primary architectural focus for code generation"
+        },
+        "brewhand.budgetLimit": {
+          "type": "number",
+          "default": 300,
+          "minimum": 0,
+          "description": "Monthly premium request limit (based on your GitHub Copilot plan)"
+        },
+        "brewhand.budgetWarningThreshold": {
+          "type": "number",
+          "default": 0.8,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Warning threshold as percentage of budget (0.8 = 80%)"
+        },
+        "brewhand.budgetStrictMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enforce strict budget limits (prevents using premium models when over budget)"
+        },
+        "brewhand.budgetResetDate": {
+          "type": "number",
+          "default": 1,
+          "minimum": 1,
+          "maximum": 28,
+          "description": "Day of month when usage resets (1-28)"
+        },
+        "brewhand.budgetStrategy": {
+          "type": "string",
+          "default": "balanced",
+          "enum": ["conservative", "balanced", "aggressive"],
+          "description": "Budget strategy: conservative (preserve premium), balanced (smart usage), aggressive (use premium freely)"
+        },
+        "brewhand.showUsageNotifications": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show notifications when reaching usage thresholds"
+        },
+        "brewhand.showUsageInStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Display usage information in the status bar"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.93.0",
+    "@types/node": "20.x",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/brewhand"
+  },
+  "license": "MIT"
+}
