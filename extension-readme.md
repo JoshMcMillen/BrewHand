@@ -242,7 +242,7 @@ Access these commands through the Command Palette (`Ctrl+Shift+P`):
 
 2. **From Source**:
    ```bash
-   git clone https://github.com/your-username/brewhand
+   git clone https://github.com/JoshMcMillen/BrewHand
    cd brewhand
    npm install
    npm run compile
@@ -760,7 +760,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 ### Development Setup
 
 ```bash
-git clone https://github.com/your-username/brewhand
+git clone https://github.com/JoshMcMillen/BrewHand
 cd brewhand
 npm install
 code .

@@ -3,7 +3,7 @@
 ## Test Status: ✅ EXTENSION IS WORKING
 
 ### 1. Installation Status
-- ✅ Extension installed: `your-publisher-name.brewhand`
+- ✅ Extension installed: `BrewCode.brewhand`
 - ✅ Compilation successful: No TypeScript errors
 - ✅ VSIX package created: `brewhand-1.0.0.vsix` (83.05 KB, 30 files)
 

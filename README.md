@@ -3,7 +3,7 @@
 > Production-Ready AI Development Assistant for VS Code
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/visual-studio-marketplace/v/your-publisher-name.brewhand)](https://marketplace.visualstudio.com/items?itemName=your-publisher-name.brewhand)
+[![Version](https://img.shields.io/visual-studio-marketplace/v/BrewCode.brewhand)](https://marketplace.visualstudio.com/items?itemName=BrewCode.brewhand)
 
 **BrewHand** is a comprehensive VS Code extension that enhances AI-powered development with production-ready code generation, intelligent shell command validation, budget management, and quality-first development principles.
 
@@ -364,8 +364,8 @@ We welcome contributions from the developer community!
 
 ### **Development Setup**
 ```bash
-git clone https://github.com/your-username/brewhand.git
-cd brewhand
+git clone https://github.com/JoshMcMillen/BrewHand.git
+cd BrewHand
 npm install
 npm run compile
 ```
@@ -396,10 +396,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support & Community
 
-- **Issues & Bugs**: [GitHub Issues](https://github.com/your-username/brewhand/issues)
-- **Feature Requests**: [GitHub Discussions](https://github.com/your-username/brewhand/discussions)
-- **Community Support**: [Discord Server](https://discord.gg/brewhand)
-- **Email Support**: support@brewhand.dev
+- **Issues & Bugs**: [GitHub Issues](https://github.com/JoshMcMillen/BrewHand/issues)
+- **Feature Requests**: [GitHub Discussions](https://github.com/JoshMcMillen/BrewHand/discussions)
+- **Community Support**: [GitHub Discussions](https://github.com/JoshMcMillen/BrewHand/discussions)
+- **Documentation**: [GitHub Repository](https://github.com/JoshMcMillen/BrewHand)
 
 ---
 

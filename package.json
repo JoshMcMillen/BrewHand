@@ -3,7 +3,7 @@
   "displayName": "BrewHand",
   "description": "Enhances GitHub Copilot with 'do it right the first time' philosophy",
   "version": "1.0.0",
-  "publisher": "your-publisher-name",
+  "publisher": "BrewCode",
   "engines": {
     "vscode": "^1.93.0"
   },
@@ -331,7 +331,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/brewhand"
+    "url": "https://github.com/JoshMcMillen/BrewHand"
   },
-  "license": "MIT"
+  "bugs": {
+    "url": "https://github.com/JoshMcMillen/BrewHand/issues"
+  },
+  "homepage": "https://github.com/JoshMcMillen/BrewHand#readme",
+  "qna": "https://github.com/JoshMcMillen/BrewHand/discussions",
+  "license": "MIT",
+  "icon": "icons/brewcode.jpg",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  }
 }
