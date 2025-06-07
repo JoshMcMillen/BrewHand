@@ -4,6 +4,7 @@
 import * as vscode from 'vscode';
 import { BudgetManager } from './src/budgetManager';
 import { ComplexityAnalyzer } from './src/complexityAnalyzer';
+import { TelemetryService } from './src/telemetry';
 
 // Model cost mapping
 const MODEL_COSTS: Record<string, number> = {
@@ -30,12 +31,14 @@ const MODEL_COSTS: Record<string, number> = {
 // Global instances
 let budgetManager: BudgetManager;
 let complexityAnalyzer: ComplexityAnalyzer;
+let telemetryService: TelemetryService;
 
 // Extension activation
 export function activate(context: vscode.ExtensionContext) {
     // Initialize managers
     budgetManager = new BudgetManager(context);
     complexityAnalyzer = new ComplexityAnalyzer();
+    telemetryService = new TelemetryService(context);
     
     // Register brewhand chat participant
     const qualityFirstParticipant = vscode.chat.createChatParticipant('brewhand', handleQualityFirstChat);
@@ -85,7 +88,24 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('brewhand.generateWithQuality', generateQualityCode),
         vscode.commands.registerCommand('brewhand.reviewCode', reviewCodeQuality),
         vscode.commands.registerCommand('brewhand.showUsageDashboard', () => {
-            showUsageDashboard(budgetManager);
+            budgetManager.showUsageDashboard();
+        }),
+        vscode.commands.registerCommand('brewhand.exportUsageData', () => {
+            budgetManager.exportUsageData();
+        }),
+        vscode.commands.registerCommand('brewhand.showTelemetrySummary', () => {
+            const summary = telemetryService.getTelemetrySummary();
+            vscode.window.showInformationMessage(summary, { modal: true });
+        }),
+        vscode.commands.registerCommand('brewhand.clearTelemetryData', async () => {
+            const confirm = await vscode.window.showWarningMessage(
+                'Clear all telemetry data? This action cannot be undone.',
+                'Clear', 'Cancel'
+            );
+            if (confirm === 'Clear') {
+                telemetryService.clearTelemetryData();
+                vscode.window.showInformationMessage('✅ Telemetry data cleared successfully.');
+            }
         }),
         vscode.commands.registerCommand('brewhand.resetUsage', async () => {
             const confirm = await vscode.window.showWarningMessage(
@@ -156,10 +176,11 @@ async function handleQualityFirstChat(
         
         // Show complexity analysis
         stream.markdown(`📈 **Task Complexity**: ${complexityLevel} (${complexityScore.toFixed(0)}/100)\n\n`);
-        
+        // Select prompt detail level
+        const promptDetail = selectPromptDetailLevel(complexityScore, remaining);
+        const qualityPrompt = getQualityPrompt(promptDetail, detectLanguage(request.prompt));
         // Adjust system prompt based on available model capabilities
-        const systemPrompt = getQualityFirstSystemPrompt(request, modelInfo);
-        
+        const systemPrompt = getQualityFirstSystemPrompt(request, modelInfo) + '\n' + qualityPrompt;
         // Construct quality-focused prompt
         const messages = [
             vscode.LanguageModelChatMessage.User(systemPrompt),
@@ -177,15 +198,45 @@ async function handleQualityFirstChat(
         const response = await model.sendRequest(messages, {}, token);
         
         stream.markdown('## BrewHand Code Generation\n\n');
-        
-        // Stream response
+        let codeResult = '';
         for await (const fragment of response.text) {
             stream.markdown(fragment);
+            codeResult += fragment;
         }
 
         // Track usage AFTER successful response
         if (cost > 0) {
             await budgetManager.trackUsage(modelInfo.displayName, cost);
+            // Track telemetry if enabled
+            telemetryService.trackModelUsage(
+                modelInfo.displayName, 
+                complexityLevel, 
+                cost, 
+                true
+            );
+        }
+        
+        // Track complexity analysis
+        telemetryService.trackComplexityAnalysis(complexityLevel, modelInfo.displayName, cost);
+        
+        // --- Quality Verification and Auto-Enhance ---
+        const hadQualityMarkers = checkQualityMarkers(codeResult);
+        if (!hadQualityMarkers && budgetManager.canAffordModel(0)) {
+            stream.markdown('\n\n🔄 Auto-enhancing for missing quality markers...');
+            const enhanced = await autoEnhanceIfNeeded(codeResult, budgetManager, token);
+            const wasEnhanced = enhanced !== codeResult;
+            
+            // Track quality enhancement
+            telemetryService.trackQualityEnhancement(
+                detectLanguage(request.prompt),
+                hadQualityMarkers,
+                wasEnhanced
+            );
+            
+            if (wasEnhanced) {
+                stream.markdown('\n\n### Enhanced Code\n');
+                stream.markdown(enhanced);
+            }
         }
 
         // Add quality checklist adjusted for model capabilities
@@ -210,6 +261,102 @@ async function handleQualityFirstChat(
         stream.markdown(`Error: ${err instanceof Error ? err.message : String(err)}`);
         return { metadata: { command: 'brewhand' } };
     }
+}
+
+// --- Enhanced Quality Prompt System and Verification ---
+
+function selectPromptDetailLevel(complexityScore: number, budget: number): 'minimal' | 'minimal-plus' | 'balanced' | 'detailed' {
+    if (complexityScore > 70) return 'detailed';
+    if (complexityScore < 30) return 'minimal';
+    if (budget > 200) return 'balanced';
+    return 'minimal-plus';
+}
+
+function getQualityPrompt(detail: 'minimal' | 'minimal-plus' | 'balanced' | 'detailed', language: string): string {
+    // All prompts include critical requirements
+    const critical = `\nCRITICAL REQUIREMENTS:\n1. Define custom error classes before implementation\n2. Input validation for every parameter\n3. Resource cleanup (finally/defer blocks)\n4. No any/unknown types\n5. Usage examples with error cases`;
+    if (detail === 'detailed') {
+        return `You are to generate a comprehensive, production-ready solution with full architectural patterns, error handling, validation, cleanup, and usage examples. Be verbose and explicit.\n${critical}`;
+    } else if (detail === 'balanced') {
+        return `Generate a robust, production-quality implementation with error handling, validation, cleanup, and usage examples.\n${critical}`;
+    } else if (detail === 'minimal-plus') {
+        return `Generate a concise but production-ready implementation with error handling, validation, and cleanup.\n${critical}`;
+    } else {
+        return `Generate a minimal, production-quality implementation with error handling and validation.\n${critical}`;
+    }
+}
+
+function checkQualityMarkers(code: string): boolean {
+    // Enhanced robustness - more flexible patterns that catch real-world quality indicators
+    const patterns = {
+        errorHandling: [
+            /class\s+\w*[Ee]rror\s+extends\s+Error/m,  // Custom error classes
+            /throw\s+new\s+\w*[Ee]rror/m,              // Error throwing
+            /catch\s*\([^)]*\)\s*{/m,                  // Try-catch blocks
+            /\.catch\s*\(/m,                           // Promise error handling
+            /on[Ee]rror\s*[:=]/m                       // Event error handlers
+        ],
+        inputValidation: [
+            /if\s*\([^)]*(?:null|undefined|![\w.]+|===?\s*null|===?\s*undefined)/m,
+            /(?:assert|validate|check)\s*\(/m,         // Validation functions
+            /typeof\s+\w+\s*[!=]==?\s*['"](?:string|number|object|boolean)['"]/m,
+            /\w+\s*instanceof\s+\w+/m,                 // Type checking
+            /Array\.isArray\s*\(/m                     // Array validation
+        ],
+        resourceManagement: [
+            /finally\s*{/m,                            // Finally blocks
+            /using\s+\w+\s*=/m,                        // Using statements (C#, newer JS)
+            /defer\s+/m,                               // Defer statements (Go, Swift)
+            /\.close\s*\(\s*\)/m,                      // Resource cleanup
+            /\.dispose\s*\(\s*\)/m,                    // Disposal pattern
+            /with\s+\w+.*:/m,                          // Python context managers
+            /RAII|unique_ptr|shared_ptr/m              // C++ resource management
+        ],
+        typeStrength: [
+            /:\s*(?!any|unknown)[A-Z]\w*(?:<[^>]+>)?/m, // Strong typing (not any/unknown)
+            /interface\s+\w+/m,                        // Interface definitions
+            /type\s+\w+\s*=/m,                         // Type aliases
+            /enum\s+\w+/m,                             // Enums
+            /Generic<\w+>/m                            // Generic types
+        ],
+        documentation: [
+            /\/\*\*[\s\S]*?\*\//m,                     // JSDoc comments
+            /^\s*#.*$/m,                               // Python docstrings start
+            /"""[\s\S]*?"""/m,                         // Python docstrings
+            /\/\/\/\s*<summary>/m,                     // C# XML docs
+            /@param|@return|@throws/m                  // Documentation tags
+        ]
+    };
+
+    // Check each category - need at least 3 out of 5 categories present
+    let categoriesPresent = 0;
+    
+    for (const [category, regexList] of Object.entries(patterns)) {
+        const categoryFound = regexList.some(regex => regex.test(code));
+        if (categoryFound) {
+            categoriesPresent++;
+        }
+    }
+    
+    // Quality threshold: at least 3 quality categories present
+    return categoriesPresent >= 3;
+}
+
+async function autoEnhanceIfNeeded(code: string, budgetManager: BudgetManager, token?: vscode.CancellationToken): Promise<string> {
+    if (checkQualityMarkers(code)) return code;
+    // Only auto-enhance if budget allows (use standard model)
+    if (!budgetManager.canAffordModel(0)) return code;
+    // Use a standard model for enhancement
+    const models = await vscode.lm.selectChatModels({ vendor: 'anthropic', family: 'claude-3.5-sonnet' });
+    if (!models.length) return code;
+    const enhancementPrompt = `Enhance this code to include:\n- Custom error classes\n- Input validation for every parameter\n- Resource cleanup (finally/defer blocks)\n- No any/unknown types\n- Usage examples with error cases\n\nCODE:\n\n${code}`;
+    const messages = [vscode.LanguageModelChatMessage.User(enhancementPrompt)];
+    const response = await models[0].sendRequest(messages, {}, token);
+    let result = '';
+    for await (const fragment of response.text) {
+        result += fragment;
+    }
+    return result || code;
 }
 
 // Get model information for user feedback and capability adjustment - corrected for actual GitHub plans
@@ -1144,114 +1291,3 @@ function analyzeCodeQuality(code: string, languageId: string): Array<{
 }
 
 export function deactivate() {}
-
-// Usage dashboard function
-async function showUsageDashboard(budgetManager: BudgetManager) {
-    const panel = vscode.window.createWebviewPanel(
-        'brewhandUsage',
-        'BrewHand Usage Dashboard',
-        vscode.ViewColumn.One,
-        {
-            enableScripts: true
-        }
-    );
-    
-    const usage = budgetManager.getDetailedUsage();
-    const remaining = budgetManager.getRemainingBudget();
-    const limit = budgetManager.getMonthlyLimit();
-    const percentUsed = ((limit - remaining) / limit * 100).toFixed(1);
-    
-    panel.webview.html = `<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>BrewHand Usage</title>
-        <style>
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                padding: 20px;
-                color: var(--vscode-foreground);
-                background-color: var(--vscode-editor-background);
-            }
-            h1, h2 { color: var(--vscode-foreground); }
-            .progress-container {
-                background-color: var(--vscode-input-background);
-                border-radius: 5px;
-                padding: 3px;
-                margin: 10px 0;
-            }
-            .progress-bar {
-                background-color: var(--vscode-progressBar-background);
-                height: 20px;
-                border-radius: 3px;
-                transition: width 0.3s ease;
-            }
-            .stats {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 20px;
-                margin: 20px 0;
-            }
-            .stat-card {
-                background-color: var(--vscode-input-background);
-                border-radius: 5px;
-                padding: 15px;
-            }
-            .model-list {
-                list-style: none;
-                padding: 0;
-            }
-            .model-list li {
-                padding: 5px 0;
-                border-bottom: 1px solid var(--vscode-panel-border);
-            }
-            .tips {
-                background-color: var(--vscode-textBlockQuote-background);
-                padding: 15px;
-                border-radius: 5px;
-                margin-top: 20px;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>BrewHand Premium Request Usage</h1>
-        
-        <h2>Monthly Summary</h2>
-        <p><strong>Used:</strong> ${limit - remaining} / ${limit} requests (${percentUsed}%)</p>
-        <div class="progress-container">
-            <div class="progress-bar" style="width: ${percentUsed}%"></div>
-        </div>
-        
-        <div class="stats">
-            <div class="stat-card">
-                <h3>Remaining Requests</h3>
-                <p style="font-size: 2em; margin: 0;">${remaining}</p>
-            </div>
-            <div class="stat-card">
-                <h3>Budget Strategy</h3>
-                <p style="font-size: 1.5em; margin: 0;">${usage.strategy}</p>
-            </div>
-        </div>
-        
-        ${Object.keys(usage.byModel).length > 0 ? `
-        <h2>Usage by Model</h2>
-        <ul class="model-list">
-            ${Object.entries(usage.byModel).map(([model, count]) => 
-                `<li><strong>${model}:</strong> ${count} requests</li>`
-            ).join('')}
-        </ul>
-        ` : ''}
-        
-        <div class="tips">
-            <h3>💡 Budget Management Tips</h3>
-            <ul>
-                <li>Use the <strong>conservative</strong> strategy to preserve premium requests for complex tasks</li>
-                <li>Set a realistic monthly limit based on your GitHub Copilot plan</li>
-                <li>Monitor your usage through the status bar indicator</li>
-                <li>Premium models are best for architecture, complex algorithms, and critical code</li>
-            </ul>
-        </div>
-    </body>
-    </html>`;
-}

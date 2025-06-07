@@ -29,7 +29,7 @@
     "onLanguage:go",
     "onLanguage:rust"
   ],
-  "main": "./out/extension.js",
+  "main": "./out/brewhand-extension.js",
   "contributes": {
     "chatParticipants": [
       {
@@ -59,6 +59,21 @@
       {
         "command": "brewhand.showUsageDashboard",
         "title": "Show Usage Dashboard",
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.exportUsageData",
+        "title": "Export Usage Data",
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.showTelemetrySummary",
+        "title": "Show Telemetry Summary",
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.clearTelemetryData",
+        "title": "Clear Telemetry Data",
         "category": "BrewHand"
       },
       {
@@ -94,6 +109,15 @@
         },
         {
           "command": "brewhand.showUsageDashboard"
+        },
+        {
+          "command": "brewhand.exportUsageData"
+        },
+        {
+          "command": "brewhand.showTelemetrySummary"
+        },
+        {
+          "command": "brewhand.clearTelemetryData"
         },
         {
           "command": "brewhand.resetUsage"
@@ -192,7 +216,11 @@
         "brewhand.budgetStrategy": {
           "type": "string",
           "default": "balanced",
-          "enum": ["conservative", "balanced", "aggressive"],
+          "enum": [
+            "conservative",
+            "balanced",
+            "aggressive"
+          ],
           "description": "Budget strategy: conservative (preserve premium), balanced (smart usage), aggressive (use premium freely)"
         },
         "brewhand.showUsageNotifications": {
@@ -204,6 +232,21 @@
           "type": "boolean",
           "default": true,
           "description": "Display usage information in the status bar"
+        },
+        "brewhand.telemetry.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable optional telemetry collection for improving BrewHand"
+        },
+        "brewhand.telemetry.anonymizeData": {
+          "type": "boolean",
+          "default": true,
+          "description": "Anonymize sensitive data in telemetry (file paths, project names)"
+        },
+        "brewhand.telemetry.localStorageOnly": {
+          "type": "boolean",
+          "default": true,
+          "description": "Store telemetry data locally only (no external transmission)"
         }
       }
     }
@@ -211,14 +254,19 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
+    "watch": "tsc -watch -p ./",
+    "test": "npm run compile && node ./out/src/test/runTest.js"
   },
   "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.19.0",
     "@types/vscode": "^1.93.0",
-    "@types/node": "20.x",
+    "@vscode/test-electron": "^2.5.2",
+    "glob": "^8.1.0",
+    "mocha": "^10.8.2",
     "typescript": "^5.4.5"
   },
-  "dependencies": {},
   "repository": {
     "type": "git",
     "url": "https://github.com/your-username/brewhand"

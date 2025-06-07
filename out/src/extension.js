@@ -15,5 +15,5 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 // Export everything from the main extension file
-__exportStar(require("../brewhand-extension"), exports);
+__exportStar(require("./brewhand-extension"), exports);
 //# sourceMappingURL=extension.js.map
