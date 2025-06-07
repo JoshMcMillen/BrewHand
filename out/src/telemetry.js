@@ -25,7 +25,10 @@ class TelemetryService {
             return;
         const event = {
             eventName,
-            properties: this.config.anonymizeData ? this.anonymizeProperties(properties) : properties,
+            properties: {
+                timestamp: Date.now(),
+                ...(this.config.anonymizeData ? this.anonymizeProperties(properties) : properties)
+            },
             measurements
         };
         this.sessionEvents.push(event);
@@ -124,6 +127,20 @@ class TelemetryService {
     clearTelemetryData() {
         this.sessionEvents = [];
         this.context.workspaceState.update('telemetryEvents', []);
+    }
+    // Get last BrewHand usage timestamp
+    getLastBrewHandUsage() {
+        const events = this.context.workspaceState.get('telemetryEvents', []);
+        // Find the most recent BrewHand-related event
+        for (let i = events.length - 1; i >= 0; i--) {
+            const event = events[i];
+            if (event.eventName.includes('chat_interaction') ||
+                event.eventName.includes('brewhand') ||
+                event.eventName.includes('command_validation')) {
+                return event.properties?.timestamp || Date.now();
+            }
+        }
+        return null;
     }
     // Check if telemetry is enabled
     isEnabled() {

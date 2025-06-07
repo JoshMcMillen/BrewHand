@@ -335,6 +335,13 @@ ${modelStats}
     getRemainingBudget() {
         return Math.max(0, this.config.monthlyLimit - this.monthlyUsage);
     }
+    getCurrentUsage() {
+        return {
+            used: this.monthlyUsage,
+            limit: this.config.monthlyLimit,
+            percentage: Math.round((this.monthlyUsage / this.config.monthlyLimit) * 100)
+        };
+    }
     getMonthlyLimit() {
         return this.config.monthlyLimit;
     }

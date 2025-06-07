@@ -1,0 +1,6 @@
+{
+  "name": "test-package",
+  "version": "1.0.0",
+  "main": "index.js"
+  // This comment will cause a syntax error in JSON
+}

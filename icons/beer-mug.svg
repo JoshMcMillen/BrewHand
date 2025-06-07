@@ -1,0 +1,21 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Beer mug handle -->
+  <path d="M12 4V5C13.6569 5 15 6.34315 15 8V10C15 11.6569 13.6569 13 12 13H11V4H12Z" fill="#D4B851" stroke="#B8922A" stroke-width="0.5"/>
+  
+  <!-- Beer mug body -->
+  <rect x="2" y="3" width="9" height="10" rx="0.5" fill="#F5E16C" stroke="#D4B851" stroke-width="0.5"/>
+  
+  <!-- Beer foam -->
+  <ellipse cx="6.5" cy="3.5" rx="4" ry="1" fill="#FFF8DC"/>
+  <circle cx="4" cy="3.2" r="0.4" fill="#FFF8DC"/>
+  <circle cx="7" cy="3.1" r="0.3" fill="#FFF8DC"/>
+  <circle cx="9" cy="3.3" r="0.35" fill="#FFF8DC"/>
+  
+  <!-- Beer liquid -->
+  <rect x="2.5" y="4.5" width="8" height="8" rx="0.3" fill="#FFD700" opacity="0.8"/>
+  
+  <!-- Bubbles -->
+  <circle cx="4" cy="8" r="0.3" fill="#FFEB3B" opacity="0.6"/>
+  <circle cx="7" cy="6" r="0.25" fill="#FFEB3B" opacity="0.6"/>
+  <circle cx="8.5" cy="9" r="0.2" fill="#FFEB3B" opacity="0.6"/>
+</svg>

@@ -391,9 +391,16 @@ ${modelStats}
       vscode.window.showErrorMessage(`❌ Failed to export usage data: ${error}`);
     }
   }
-  
-  getRemainingBudget(): number {
+    getRemainingBudget(): number {
     return Math.max(0, this.config.monthlyLimit - this.monthlyUsage);
+  }
+  
+  getCurrentUsage(): { used: number; limit: number; percentage: number } {
+    return {
+      used: this.monthlyUsage,
+      limit: this.config.monthlyLimit,
+      percentage: Math.round((this.monthlyUsage / this.config.monthlyLimit) * 100)
+    };
   }
   
   getMonthlyLimit(): number {

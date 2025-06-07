@@ -1,0 +1,10 @@
+{
+  "name": "validation-test",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "npm run compile"
+  },
+  "devDependencies": {
+    "typescript": "^4.0.0",
+  }
+}

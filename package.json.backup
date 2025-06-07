@@ -1,7 +1,8 @@
-{  "name": "brewhand",
+{
+  "name": "brewhand",
   "displayName": "BrewHand",
   "description": "Enhances GitHub Copilot with 'do it right the first time' philosophy",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "publisher": "BrewCode",
   "engines": {
     "vscode": "^1.93.0"
@@ -86,16 +87,12 @@
         "category": "BrewHand"
       },
       {
-        "command": "brewhand.formatCommand",        "title": "BrewHand: Format Command for Current Shell",
+        "command": "brewhand.formatCommand",
+        "title": "BrewHand: Format Command for Current Shell",
         "category": "BrewHand"
       },      {
         "command": "brewhand.toggleAutoMode",
         "title": "BrewHand: Toggle Chat Reminder",
-        "category": "BrewHand"
-      },
-      {
-        "command": "brewhand.toggleAlwaysActive",
-        "title": "BrewHand: Toggle Always Active Mode",
         "category": "BrewHand"
       },
       {
@@ -116,37 +113,11 @@
         "icon": "$(gear)"
       },
       {
-        "command": "brewhand.refreshViews",        "title": "Refresh",
+        "command": "brewhand.refreshViews",
+        "title": "Refresh",
         "icon": "$(refresh)"
       }
-    ],    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "brewhand-panel",
-          "title": "Beer Menu",
-          "icon": "./icons/beer-mug.svg"
-        }
-      ]
-    },
-    "views": {
-      "brewhand-panel": [
-        {
-          "id": "brewhand-features",
-          "name": "Features",
-          "when": "true"
-        },
-        {
-          "id": "brewhand-settings",
-          "name": "Quick Settings", 
-          "when": "true"
-        },
-        {
-          "id": "brewhand-usage",
-          "name": "Usage & Stats",
-          "when": "true"
-        }
-      ]
-    },
+    ],
     "menus": {
       "editor/context": [
         {
@@ -194,14 +165,6 @@
           "command": "brewhand.formatCommand"
         },        {
           "command": "brewhand.toggleAutoMode"
-        },
-        {
-          "command": "brewhand.toggleAlwaysActive"
-        },
-        {
-          "command": "brewhand.openFeatures"
-        },        {
-          "command": "brewhand.openSettings"
         }
       ],
       "view/title": [
@@ -231,6 +194,34 @@
           "command": "brewhand.openSettings",
           "when": "view == brewhand-settings && viewItem == setting",
           "group": "inline"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "brewhand-panel",
+          "title": "BrewHand",
+          "icon": "$(beaker)"
+        }
+      ]
+    },
+    "views": {
+      "brewhand-panel": [
+        {
+          "id": "brewhand-features",
+          "name": "Features",
+          "when": "true"
+        },
+        {
+          "id": "brewhand-settings",
+          "name": "Quick Settings", 
+          "when": "true"
+        },
+        {
+          "id": "brewhand-usage",
+          "name": "Usage & Stats",
+          "when": "true"
         }
       ]
     },
@@ -388,30 +379,11 @@
           "type": "boolean",
           "default": true,
           "description": "Verify and suggest corrections for import path errors"
-        },        "brewhand.autoModeEnabled": {
+        },
+        "brewhand.autoModeEnabled": {
           "type": "boolean",
           "default": false,
           "description": "Enable BrewHand reminder in status bar to use @brewhand in chat"
-        },
-        "brewhand.alwaysActive": {
-          "type": "boolean",
-          "default": false,
-          "description": "Make BrewHand always active and monitor for opportunities to help"
-        },
-        "brewhand.showAutoSuggestions": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show automatic suggestions when BrewHand can help with commands"
-        },
-        "brewhand.showReminders": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show periodic reminders to use @brewhand for better commands"
-        },
-        "brewhand.lastReminderTime": {
-          "type": "number",
-          "default": 0,
-          "description": "Internal: Last time a reminder was shown"
         }
       }
     }

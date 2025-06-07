@@ -7,6 +7,22 @@
 
 **BrewHand** is a comprehensive VS Code extension that enhances AI-powered development with production-ready code generation, intelligent shell command validation, budget management, and quality-first development principles.
 
+## 🆕 What's New in v1.0.1
+
+### **Always-Active Monitoring** 🔄
+- **Proactive assistance** that monitors clipboard and terminal for opportunities to help
+- **Auto-suggestions** when shell syntax errors are detected
+- **Smart reminders** to use @brewhand with intelligent cooldowns
+- **Toggle command**: `BrewHand: Toggle Always Active Mode`
+
+### **Enhanced Shell Integration** 🐚
+- **Real-time command validation** with immediate feedback
+- **Cross-platform syntax detection** (PowerShell `;` vs Bash `&&`)
+- **Proactive error prevention** before commands fail
+- **Seamless @brewhand integration** for command assistance
+
+[View Full Changelog](CHANGELOG.md)
+
 ## ✨ Key Features
 
 ### 🎯 **Quality-First AI Development**
@@ -26,6 +42,9 @@
 - **@brewhand chat participant** with quality-focused responses
 - **Context-aware conversations** that understand your project structure
 - **Budget-aware model selection** automatically choosing optimal AI models
+- **Always-active monitoring** for proactive shell command assistance
+- **Auto-suggestions** when syntax errors are detected in commands
+- **Smart reminders** to use @brewhand for better development workflow
 - **Visual chat reminder** in status bar for consistent @brewhand usage
 - **Follow-up suggestions** for error handling, testing, and architecture review
 
@@ -57,7 +76,7 @@
 4. Click **Install**
 
 ### From VSIX File
-1. Download the latest `brewhand-1.0.0.vsix` file
+1. Download the latest `brewhand-1.0.1.vsix` file
 2. Open VS Code
 3. Press `Ctrl+Shift+P` → "Extensions: Install from VSIX..."
 4. Select the downloaded `.vsix` file
@@ -85,6 +104,17 @@ BrewHand: Toggle Chat Reminder
 
 ### 5. **Validate Shell Commands**
 BrewHand automatically detects and validates shell commands in your AI conversations, providing syntax corrections and cross-platform compatibility.
+
+### 6. **Enable Always-Active Mode (New in v1.0.1)**
+For proactive assistance, enable always-active monitoring:
+```
+BrewHand: Toggle Always Active Mode
+```
+This enables:
+- **Clipboard monitoring** for shell command syntax issues
+- **Automatic suggestions** when BrewHand can help
+- **Smart reminders** to use @brewhand for better commands
+- **Proactive error prevention** before commands fail
 
 ## 📋 System Requirements
 
@@ -128,7 +158,10 @@ BrewHand automatically detects and validates shell commands in your AI conversat
 ### **Chat Integration**
 ```json
 {
-  "brewhand.autoModeEnabled": false
+  "brewhand.autoModeEnabled": false,
+  "brewhand.alwaysActive": false,
+  "brewhand.showAutoSuggestions": true,
+  "brewhand.showReminders": true
 }
 ```
 
@@ -218,6 +251,7 @@ BrewHand automatically selects the most appropriate AI model based on:
 | **BrewHand: Detect Current Shell** | - | Display detected shell type and separator |
 | **BrewHand: Format Command for Current Shell** | - | Format shell commands for current environment |
 | **BrewHand: Toggle Chat Reminder** | - | Toggle status bar reminder to use @brewhand |
+| **BrewHand: Toggle Always Active Mode** | - | Enable/disable always-active monitoring for proactive assistance |
 
 ## 📊 Usage Dashboard
 

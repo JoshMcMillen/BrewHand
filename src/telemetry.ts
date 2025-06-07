@@ -30,14 +30,16 @@ export class TelemetryService {
       localStorageOnly: config.get('telemetry.localStorageOnly', true)
     };
   }
-  
-  // Track extension usage events
+    // Track extension usage events
   trackEvent(eventName: string, properties?: Record<string, any>, measurements?: Record<string, number>) {
     if (!this.config.enabled) return;
     
     const event: TelemetryEvent = {
       eventName,
-      properties: this.config.anonymizeData ? this.anonymizeProperties(properties) : properties,
+      properties: { 
+        timestamp: Date.now(),
+        ...(this.config.anonymizeData ? this.anonymizeProperties(properties) : properties)
+      },
       measurements
     };
     
@@ -148,11 +150,27 @@ export class TelemetryService {
     
     return `Telemetry Summary (${events.length} total events):\n${summary}`;
   }
-  
-  // Clear all telemetry data
+    // Clear all telemetry data
   clearTelemetryData() {
     this.sessionEvents = [];
     this.context.workspaceState.update('telemetryEvents', []);
+  }
+  
+  // Get last BrewHand usage timestamp
+  getLastBrewHandUsage(): number | null {
+    const events = this.context.workspaceState.get<TelemetryEvent[]>('telemetryEvents', []);
+    
+    // Find the most recent BrewHand-related event
+    for (let i = events.length - 1; i >= 0; i--) {
+      const event = events[i];
+      if (event.eventName.includes('chat_interaction') || 
+          event.eventName.includes('brewhand') ||
+          event.eventName.includes('command_validation')) {
+        return event.properties?.timestamp as number || Date.now();
+      }
+    }
+    
+    return null;
   }
   
   // Check if telemetry is enabled
