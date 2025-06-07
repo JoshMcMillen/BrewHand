@@ -8,6 +8,18 @@ const vscode = require("vscode");
 const budgetManager_1 = require("./budgetManager");
 const complexityAnalyzer_1 = require("./complexityAnalyzer");
 const telemetry_1 = require("./telemetry");
+const commandValidator_1 = require("./commandValidator");
+const shellDetector_1 = require("./shellDetector");
+const commandFormatter_1 = require("./commandFormatter");
+const terminalMonitor_1 = require("./terminalMonitor");
+// Global instances
+let budgetManager;
+let complexityAnalyzer;
+let telemetryService;
+let commandValidator;
+let terminalMonitor;
+let autoBrewHandToggle;
+let isAutoBrewHandEnabled = false;
 // Model cost mapping
 const MODEL_COSTS = {
     'Claude Opus 4': 15,
@@ -29,16 +41,28 @@ const MODEL_COSTS = {
     'GPT-4o': 0,
     'Gemini 1.5 Pro': 0
 };
-// Global instances
-let budgetManager;
-let complexityAnalyzer;
-let telemetryService;
 // Extension activation
 function activate(context) {
     // Initialize managers
     budgetManager = new budgetManager_1.BudgetManager(context);
     complexityAnalyzer = new complexityAnalyzer_1.ComplexityAnalyzer();
     telemetryService = new telemetry_1.TelemetryService(context);
+    commandValidator = new commandValidator_1.CommandValidator();
+    terminalMonitor = new terminalMonitor_1.TerminalOutputMonitor();
+    // Enable terminal command validation if configured
+    if (vscode.workspace.getConfiguration('brewhand').get('monitorTerminalCommands', true)) {
+        setupTerminalCommandValidation();
+    }
+    // Initialize auto-BrewHand toggle
+    autoBrewHandToggle = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 99);
+    autoBrewHandToggle.command = 'brewhand.toggleAutoMode';
+    updateAutoBrewHandStatus();
+    context.subscriptions.push(autoBrewHandToggle);
+    // Setup chat interception for auto mode
+    if (vscode.workspace.getConfiguration('brewhand').get('autoModeEnabled', false)) {
+        isAutoBrewHandEnabled = true;
+        updateAutoBrewHandStatus();
+    }
     // Register brewhand chat participant
     const qualityFirstParticipant = vscode.chat.createChatParticipant('brewhand', handleQualityFirstChat);
     qualityFirstParticipant.iconPath = vscode.Uri.joinPath(context.extensionUri, 'icons', 'quality-icon.png');
@@ -60,25 +84,6 @@ function activate(context) {
             ];
         }
     };
-    // Register agent mode tool for quality enhancement
-    const qualityTool = vscode.lm.registerTool('quality-enhancer', {
-        invoke: async (options, token) => {
-            const result = await enhanceCodeQuality(options.input, token);
-            return new vscode.LanguageModelToolResult([
-                new vscode.LanguageModelTextPart(result)
-            ]);
-        },
-        prepareInvocation: async (options, token) => {
-            const input = options.input;
-            return {
-                input: `Enhance the following code with production-ready patterns: ${input}`,
-                confirmationMessages: {
-                    title: 'Quality Enhancement',
-                    message: 'Apply production-ready patterns to the selected code?'
-                }
-            };
-        }
-    });
     // Register commands
     context.subscriptions.push(vscode.commands.registerCommand('brewhand.enhanceSelection', enhanceSelectedCode), vscode.commands.registerCommand('brewhand.generateWithQuality', generateQualityCode), vscode.commands.registerCommand('brewhand.reviewCode', reviewCodeQuality), vscode.commands.registerCommand('brewhand.showUsageDashboard', () => {
         budgetManager.showUsageDashboard();
@@ -98,7 +103,99 @@ function activate(context) {
         if (confirm === 'Yes') {
             budgetManager.resetMonthlyUsage();
         }
-    }), qualityFirstParticipant, qualityTool);
+    }), vscode.commands.registerCommand('brewhand.detectShell', () => {
+        const shellInfo = commandValidator.getShellInfo();
+        vscode.window.showInformationMessage(`Detected Shell: ${shellInfo.type} | Separator: "${shellInfo.separator}"`);
+    }), vscode.commands.registerCommand('brewhand.formatCommand', async () => {
+        const input = await vscode.window.showInputBox({
+            prompt: 'Enter command to format for current shell',
+            placeHolder: 'cd /path && npm install'
+        });
+        if (input) {
+            // Check for common shell syntax issues before formatting
+            const shellInfo = commandValidator.getShellInfo();
+            const formatter = new commandFormatter_1.CommandFormatter();
+            // Validate and warn about syntax issues
+            if (shellInfo.type === 'powershell' && input.includes('&&')) {
+                vscode.window.showWarningMessage('⚠️ PowerShell does not support "&&" - use ";" instead', 'Fix Automatically', 'Cancel').then(selection => {
+                    if (selection === 'Fix Automatically') {
+                        const fixed = input.replace(/&&/g, ';');
+                        vscode.env.clipboard.writeText(fixed);
+                        vscode.window.showInformationMessage(`✅ Fixed command copied: ${fixed}`);
+                    }
+                });
+                return;
+            }
+            const formatted = formatter.formatCommand(input);
+            await vscode.env.clipboard.writeText(formatted);
+            vscode.window.showInformationMessage(`Formatted command copied: ${formatted}`);
+        }
+    }), vscode.commands.registerCommand('brewhand.toggleAutoMode', () => {
+        isAutoBrewHandEnabled = !isAutoBrewHandEnabled;
+        vscode.workspace.getConfiguration('brewhand').update('autoModeEnabled', isAutoBrewHandEnabled, vscode.ConfigurationTarget.Global);
+        updateAutoBrewHandStatus();
+        if (isAutoBrewHandEnabled) {
+            vscode.window.showInformationMessage('✅ BrewHand Auto Reminder enabled - Status bar will remind you to use @brewhand', 'Open Chat', 'Got it').then(selection => {
+                if (selection === 'Open Chat') {
+                    vscode.commands.executeCommand('workbench.panel.chat.view.copilot.focus');
+                }
+            });
+        }
+        else {
+            vscode.window.showInformationMessage('❌ BrewHand Auto Reminder disabled');
+        }
+    }), qualityFirstParticipant);
+}
+// Setup terminal command validation to catch shell syntax errors
+function setupTerminalCommandValidation() {
+    // Monitor when commands are typed into the terminal
+    vscode.window.onDidChangeTerminalState((terminal) => {
+        if (terminal.exitStatus) {
+            // Terminal exited, check if it was due to a command error
+            checkLastTerminalCommand();
+        }
+    });
+    // Also monitor for new terminals
+    vscode.window.onDidOpenTerminal((terminal) => {
+        // Register for this terminal if needed
+    });
+}
+async function checkLastTerminalCommand() {
+    try {
+        const activeTerminal = vscode.window.activeTerminal;
+        if (!activeTerminal)
+            return;
+        // For PowerShell, we can detect common syntax errors
+        const shellInfo = commandValidator.getShellInfo();
+        if (shellInfo.type === 'powershell') {
+            // Show a helpful tip about PowerShell syntax
+            vscode.window.showInformationMessage('💡 BrewHand Tip: In PowerShell, use ";" instead of "&&" to chain commands', 'Format Command', 'Learn More').then(selection => {
+                if (selection === 'Format Command') {
+                    vscode.commands.executeCommand('brewhand.formatCommand');
+                }
+                else if (selection === 'Learn More') {
+                    vscode.commands.executeCommand('brewhand.detectShell');
+                }
+            });
+        }
+    }
+    catch (error) {
+        // Silently handle errors in terminal monitoring
+    }
+}
+// Update status bar item for automatic BrewHand
+function updateAutoBrewHandStatus() {
+    if (isAutoBrewHandEnabled) {
+        autoBrewHandToggle.text = '$(zap) @brewhand Reminder: ON';
+        autoBrewHandToggle.tooltip = 'BrewHand Reminder enabled - Click to disable\n\n💡 Remember to use @brewhand in chat for:\n• Shell command validation\n• Code quality analysis\n• Budget-aware model selection\n• Complexity analysis';
+        autoBrewHandToggle.backgroundColor = new vscode.ThemeColor('statusBarItem.prominentBackground');
+    }
+    else {
+        autoBrewHandToggle.text = '$(zap) @brewhand Reminder: OFF';
+        autoBrewHandToggle.tooltip = 'BrewHand Reminder disabled - Click to enable\n\nUse @brewhand in chat for enhanced functionality';
+        autoBrewHandToggle.backgroundColor = undefined;
+    }
+    autoBrewHandToggle.show();
 }
 // Main chat participant handler
 async function handleQualityFirstChat(request, context, stream, token) {
@@ -144,11 +241,24 @@ async function handleQualityFirstChat(request, context, stream, token) {
         }
         // Show complexity analysis
         stream.markdown(`📈 **Task Complexity**: ${complexityLevel} (${complexityScore.toFixed(0)}/100)\n\n`);
+        // Check for command validation needs
+        const hasCommands = detectCommandsInPrompt(request.prompt);
+        const hasCompileCommands = hasCompilationCommands(request.prompt);
+        if (hasCommands) {
+            stream.markdown(`🔧 **Command Detection**: Shell commands detected - applying syntax validation\n\n`);
+        }
         // Select prompt detail level
         const promptDetail = selectPromptDetailLevel(complexityScore, remaining);
         const qualityPrompt = getQualityPrompt(promptDetail, detectLanguage(request.prompt));
-        // Adjust system prompt based on available model capabilities
-        const systemPrompt = getQualityFirstSystemPrompt(request, modelInfo) + '\n' + qualityPrompt;
+        // Build system prompt with shell awareness if commands detected
+        let systemPrompt = getQualityFirstSystemPrompt(request, modelInfo) + '\n' + qualityPrompt;
+        if (hasCommands) {
+            const shellAwarePrompt = getShellAwareSystemPrompt();
+            systemPrompt = shellAwarePrompt + '\n\n' + systemPrompt;
+            if (hasCompileCommands) {
+                systemPrompt += '\n\nCRITICAL: This task involves compilation commands. You MUST verify compilation success before proceeding with dependent commands.';
+            }
+        }
         // Construct quality-focused prompt
         const messages = [
             vscode.LanguageModelChatMessage.User(systemPrompt),
@@ -187,6 +297,40 @@ async function handleQualityFirstChat(request, context, stream, token) {
                 stream.markdown(enhanced);
             }
         }
+        // --- Command Validation and Shell Syntax Check ---
+        if (hasCommands && vscode.workspace.getConfiguration('brewhand').get('autoFixShellSyntax', true)) {
+            stream.markdown('\n\n🔧 **Command Validation**\n');
+            // Extract potential commands from the response
+            const commandMatches = codeResult.match(/```[\w]*\n[\s\S]*?\n```/g) || [];
+            const codeBlocks = commandMatches.map(block => block.replace(/```[\w]*\n|\n```/g, ''));
+            let foundCommands = false;
+            for (const block of codeBlocks) {
+                if (detectCommandsInPrompt(block)) {
+                    foundCommands = true;
+                    // Use CommandFormatter to validate syntax
+                    const formatter = new commandFormatter_1.CommandFormatter();
+                    const validation = formatter.validateSyntax(block);
+                    if (!validation.valid) {
+                        stream.markdown(`⚠️ **Shell syntax issues detected:**\n`);
+                        validation.issues.forEach((issue) => {
+                            stream.markdown(`- ${issue}\n`);
+                        });
+                        if (validation.fixed) {
+                            stream.markdown(`\n**Corrected command:**\n\`${validation.fixed}\`\n`);
+                        }
+                    }
+                    else {
+                        stream.markdown(`✅ Command syntax validated for ${commandValidator.getShellInfo().type}\n`);
+                    }
+                }
+            }
+            if (!foundCommands) {
+                stream.markdown(`ℹ️ No executable commands found in response\n`);
+            }
+            if (hasCompileCommands) {
+                stream.markdown(`\n⚠️ **Important**: Verify compilation output before running dependent commands\n`);
+            }
+        }
         // Add quality checklist adjusted for model capabilities
         stream.markdown('\n\n## Quality Checklist ✓\n');
         const checklist = getQualityChecklist(modelInfo);
@@ -209,6 +353,58 @@ async function handleQualityFirstChat(request, context, stream, token) {
         stream.markdown(`Error: ${err instanceof Error ? err.message : String(err)}`);
         return { metadata: { command: 'brewhand' } };
     }
+}
+// Command detection and validation integration
+function detectCommandsInPrompt(prompt) {
+    // Common command patterns that need shell validation
+    const commandPatterns = [
+        /\b(npm|yarn|pnpm)\s+(install|run|build|start|test|compile)\b/i,
+        /\b(tsc|npx|node)\b/i,
+        /\b(cd|mkdir|ls|dir|copy|move|mv|cp)\b/i,
+        /\b(git|svn|hg)\s+\w+/i,
+        /\b(docker|kubectl|cargo|go)\s+\w+/i,
+        /\b(python|pip|conda)\s+\w+/i,
+        /\b(ruby|gem|bundle|rake)\s+\w+/i,
+        /\b(dotnet|nuget)\s+\w+/i,
+        /[;&|]+/, // Command separators
+        /&&|\|\||;/, // Shell operators
+        /^\s*(cd|ls|dir|npm|yarn|git|docker)\s/m // Commands at start of line
+    ];
+    return commandPatterns.some(pattern => pattern.test(prompt));
+}
+function hasCompilationCommands(prompt) {
+    return /\b(npm\s+run\s+compile|tsc|npx\s+tsc|dotnet\s+build|mvn\s+compile|gradle\s+build)\b/i.test(prompt);
+}
+// Shell-aware system prompt for command execution
+function getShellAwareSystemPrompt() {
+    const shellInfo = shellDetector_1.ShellDetector.detect();
+    const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || process.cwd();
+    return `
+CRITICAL ENVIRONMENT INFORMATION:
+- Shell: ${shellInfo.type}
+- Platform: ${process.platform}
+- Working Directory: ${cwd}
+- Command Separator: "${shellInfo.separator}" (NOT any other separator!)
+
+MANDATORY RULES FOR COMMANDS:
+1. ALWAYS use "${shellInfo.separator}" to chain commands
+2. NEVER use ${shellInfo.type === 'powershell' ? '&&' : ';'} in ${shellInfo.type}
+3. Quote paths with spaces using ${shellInfo.pathQuote}
+4. Example for this environment: ${shellInfo.exampleCommand}
+
+COMPILATION ERROR HANDLING:
+1. After running "npm run compile", READ THE ENTIRE OUTPUT
+2. Look for "error TS" or "Found X error" - these indicate FAILURE
+3. If compilation fails, DO NOT proceed with dependent commands
+4. Parse and report each error with file:line:column
+5. NEVER claim "compilation succeeded" if you see "error TS" in output
+
+When you see TypeScript errors:
+- State: "Compilation failed with X errors"
+- List each error clearly
+- DO NOT make assumptions about file locations
+- Verify actual paths before suggesting fixes
+`;
 }
 // --- Enhanced Quality Prompt System and Verification ---
 function selectPromptDetailLevel(complexityScore, budget) {

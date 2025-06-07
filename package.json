@@ -43,42 +43,57 @@
     "commands": [
       {
         "command": "brewhand.enhanceSelection",
-        "title": "Enhance Selected Code",
+        "title": "BrewHand: Enhance Selected Code",
         "category": "BrewHand"
       },
       {
         "command": "brewhand.generateWithQuality",
-        "title": "Generate Quality Code",
+        "title": "BrewHand: Generate Quality Code",
         "category": "BrewHand"
       },
       {
         "command": "brewhand.reviewCode",
-        "title": "Review Code Quality",
+        "title": "BrewHand: Review Code Quality",
         "category": "BrewHand"
       },
       {
         "command": "brewhand.showUsageDashboard",
-        "title": "Show Usage Dashboard",
+        "title": "BrewHand: Show Usage Dashboard",
         "category": "BrewHand"
       },
       {
         "command": "brewhand.exportUsageData",
-        "title": "Export Usage Data",
+        "title": "BrewHand: Export Usage Data",
         "category": "BrewHand"
       },
       {
         "command": "brewhand.showTelemetrySummary",
-        "title": "Show Telemetry Summary",
+        "title": "BrewHand: Show Telemetry Summary",
         "category": "BrewHand"
       },
       {
         "command": "brewhand.clearTelemetryData",
-        "title": "Clear Telemetry Data",
+        "title": "BrewHand: Clear Telemetry Data",
         "category": "BrewHand"
       },
       {
         "command": "brewhand.resetUsage",
-        "title": "Reset Monthly Usage",
+        "title": "BrewHand: Reset Monthly Usage",
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.detectShell",
+        "title": "BrewHand: Detect Current Shell",
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.formatCommand",
+        "title": "BrewHand: Format Command for Current Shell",
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.toggleAutoMode",
+        "title": "BrewHand: Toggle Chat Reminder",
         "category": "BrewHand"
       }
     ],
@@ -121,6 +136,15 @@
         },
         {
           "command": "brewhand.resetUsage"
+        },
+        {
+          "command": "brewhand.detectShell"
+        },
+        {
+          "command": "brewhand.formatCommand"
+        },
+        {
+          "command": "brewhand.toggleAutoMode"
         }
       ]
     },
@@ -247,6 +271,42 @@
           "type": "boolean",
           "default": true,
           "description": "Store telemetry data locally only (no external transmission)"
+        },
+        "brewhand.shellDetection": {
+          "type": "string",
+          "default": "auto",
+          "enum": ["auto", "powershell", "cmd", "bash", "zsh"],
+          "description": "Shell type detection (auto recommended)"
+        },
+        "brewhand.autoFixShellSyntax": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically fix shell command syntax"
+        },
+        "brewhand.blockOnCompileErrors": {
+          "type": "boolean",
+          "default": true,
+          "description": "Prevent running dependent commands after compilation failures"
+        },
+        "brewhand.showCommandCorrections": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show command syntax corrections before execution"
+        },
+        "brewhand.monitorTerminalCommands": {
+          "type": "boolean",
+          "default": true,
+          "description": "Monitor terminal for shell syntax errors and provide helpful suggestions"
+        },
+        "brewhand.verifyImportPaths": {
+          "type": "boolean",
+          "default": true,
+          "description": "Verify and suggest corrections for import path errors"
+        },
+        "brewhand.autoModeEnabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable BrewHand reminder in status bar to use @brewhand in chat"
         }
       }
     }
@@ -255,7 +315,9 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "test": "npm run compile && node ./out/src/test/runTest.js"
+    "test": "npm run compile && node ./out/src/test/runTest.js",
+    "package": "vsce package",
+    "install-extension": "code --install-extension brewhand-1.0.0.vsix"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
