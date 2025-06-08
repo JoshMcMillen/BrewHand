@@ -1,7 +1,7 @@
 {  "name": "brewhand",
   "displayName": "BrewHand",
   "description": "Enhances GitHub Copilot with 'do it right the first time' philosophy",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "publisher": "BrewCode",
   "engines": {
     "vscode": "^1.93.0"
@@ -18,17 +18,10 @@
     "code quality",
     "best practices",
     "architecture"
+  ],  "activationEvents": [
+    "*"
   ],
-  "activationEvents": [
-    "onLanguage:javascript",
-    "onLanguage:typescript",
-    "onLanguage:python",
-    "onLanguage:java",
-    "onLanguage:csharp",
-    "onLanguage:go",
-    "onLanguage:rust"
-  ],
-  "main": "./out/brewhand-extension.js",
+  "main": "./out/src/extension.js",
   "contributes": {
     "chatParticipants": [
       {

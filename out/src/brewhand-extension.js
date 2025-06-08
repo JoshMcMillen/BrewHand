@@ -10,6 +10,7 @@ const complexityAnalyzer_1 = require("./complexityAnalyzer");
 const telemetry_1 = require("./telemetry");
 const commandValidator_1 = require("./commandValidator");
 const shellDetector_1 = require("./shellDetector");
+const commandFormatter_1 = require("./commandFormatter");
 const terminalMonitor_1 = require("./terminalMonitor");
 const viewProviders_1 = require("./viewProviders");
 // Global instances
@@ -65,8 +66,8 @@ function activate(context) {
     // Monitor for commands generated outside of @brewhand
     setupCommandMonitoring(context); // Create persistent status bar item for Beer Menu
     brewHandStatusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-    brewHandStatusBar.text = "$(beaker) Beer Menu";
-    brewHandStatusBar.tooltip = "Beer Menu - Click to open panel";
+    brewHandStatusBar.text = "🍺 Beer Menu";
+    brewHandStatusBar.tooltip = "Beer Menu - Click to open BrewHand panel";
     brewHandStatusBar.command = 'brewhand.openFeatures';
     brewHandStatusBar.show();
     context.subscriptions.push(brewHandStatusBar);
@@ -250,7 +251,15 @@ async function toggleAlwaysActive() {
 }
 // View command handlers
 async function openFeatures() {
-    vscode.commands.executeCommand('brewhand-features.focus');
+    // Show the BrewHand panel in the Activity Bar
+    vscode.commands.executeCommand('workbench.view.extension.brewhand-panel');
+}
+async function refreshViews() {
+    featuresProvider.refresh();
+    settingsProvider.refresh();
+    usageProvider.refresh();
+    updateBrewHandStatusBar();
+    vscode.window.showInformationMessage('🍺 BrewHand views refreshed!');
 }
 async function toggleFeature(configKey) {
     const config = vscode.workspace.getConfiguration();
@@ -294,12 +303,6 @@ async function editSetting(setting) {
         settingsProvider.refresh();
         vscode.window.showInformationMessage(`🍺 ${setting.label} updated`);
     }
-}
-async function refreshViews() {
-    featuresProvider.refresh();
-    settingsProvider.refresh();
-    usageProvider.refresh();
-    updateBrewHandStatusBar();
 }
 // File validation functions
 async function validatePackageJsonOnSave(document) {
@@ -358,47 +361,179 @@ async function validateJsonFileOnSave(document) {
         vscode.window.showWarningMessage(`🍺 BrewHand: JSON syntax error - this will cause build failures!`);
     }
 }
-// Chat participant handler
+// Chat participant handler - Enhanced with command validation
 async function handleChatRequest(request, context, stream, token) {
     try {
-        budgetManager.trackUsage('chat', 1);
-        if (request.prompt.toLowerCase().includes('shell') || request.prompt.toLowerCase().includes('command')) {
-            return await handleShellCommand(request, stream);
+        // Detect and validate shell commands in the prompt
+        const shellCommandPattern = /(?:cd|npm|yarn|git|tsc|node|python|pip|cargo|go|docker|kubectl)\s+[^\n]+/gi;
+        const detectedCommands = request.prompt.match(shellCommandPattern);
+        if (detectedCommands && detectedCommands.length > 0) {
+            stream.markdown('🔧 **Command Detection:** Shell commands detected - applying syntax validation\n\n');
+            // Validate each detected command
+            for (const command of detectedCommands) {
+                const validation = commandValidator.getShellInfo();
+                const formatted = new commandFormatter_1.CommandFormatter();
+                const syntaxCheck = formatted.validateSyntax(command.trim());
+                if (!syntaxCheck.valid) {
+                    stream.markdown(`⚠️ **Shell Syntax Issue Detected in:** \`${command}\`\n`);
+                    syntaxCheck.issues.forEach(issue => stream.markdown(`- ${issue}\n`));
+                    if (syntaxCheck.fixed) {
+                        stream.markdown(`✅ **Corrected Command:** \`${syntaxCheck.fixed}\`\n\n`);
+                    }
+                }
+            }
         }
-        stream.markdown('🍺 **Beer Menu Quality Assistant**\n\n');
+        budgetManager.trackUsage('chat', 1);
+        stream.markdown('🍺 **BrewHand Quality Assistant**\n\n');
         const analysis = complexityAnalyzer.analyzeComplexity(request.prompt);
+        // Show shell info for command-related requests
+        if (request.prompt.toLowerCase().includes('command') ||
+            request.prompt.toLowerCase().includes('shell') ||
+            request.prompt.toLowerCase().includes('terminal') ||
+            detectedCommands) {
+            const shellInfo = commandValidator.getShellInfo();
+            stream.markdown(`🖥️ **Detected Shell:** ${shellInfo.type} | **Separator:** ${shellInfo.separator}\n`);
+            if (shellInfo.type === 'powershell') {
+                stream.markdown('💡 **PowerShell Tip:** Use `;` instead of `&&` to chain commands\n\n');
+            }
+            else {
+                stream.markdown('💡 **Bash/Zsh Tip:** Use `&&` to chain commands conditionally\n\n');
+            }
+        }
         if (analysis.scope > 70) {
             stream.markdown('⚠️ **High Complexity Detected**\n');
             stream.markdown(`- Complexity scope: ${analysis.scope}/100\n`);
             stream.markdown(`- Keywords: ${analysis.keywords}/100\n`);
-            stream.markdown(`- Patterns: ${analysis.patterns}/100\n`);
+            stream.markdown(`- Patterns: ${analysis.patterns}/100\n\n`);
         }
-        // For now, just provide analysis feedback instead of generating code
-        stream.markdown(`\n**Analysis Results:**\n`);
-        stream.markdown(`- Technical Keywords: ${analysis.keywords}/100\n`);
-        stream.markdown(`- Architecture Patterns: ${analysis.patterns}/100\n`);
-        stream.markdown(`- Scope Complexity: ${analysis.scope}/100\n`);
-        stream.markdown(`- Contextual Factors: ${analysis.contextual}/100\n`);
-        stream.markdown('\n💡 **Tip:** Use specific technical terms and clear requirements for better code generation.');
+        // Enhanced analysis results
+        stream.markdown(`## BrewHand Code Analysis\n\n`);
+        stream.markdown(`📊 **Complexity Score:** ${analysis.scope}/100 (${getComplexityLevel(analysis.scope)})\n`);
+        stream.markdown(`🔤 **Technical Keywords:** ${analysis.keywords}/100\n`);
+        stream.markdown(`🏗️ **Architecture Patterns:** ${analysis.patterns}/100\n`);
+        stream.markdown(`🎯 **Contextual Factors:** ${analysis.contextual}/100\n\n`);
+        // Provide actionable suggestions based on analysis
+        if (analysis.scope > 80) {
+            stream.markdown('🚀 **Recommendations for High-Complexity Tasks:**\n');
+            stream.markdown('- Break down into smaller, focused components\n');
+            stream.markdown('- Use established design patterns (Factory, Observer, etc.)\n');
+            stream.markdown('- Implement comprehensive error handling\n');
+            stream.markdown('- Add thorough input validation\n');
+            stream.markdown('- Consider using TypeScript for better type safety\n\n');
+        }
+        else if (analysis.scope > 50) {
+            stream.markdown('⚡ **Recommendations for Medium-Complexity Tasks:**\n');
+            stream.markdown('- Use clear function/class naming conventions\n');
+            stream.markdown('- Add basic error handling and validation\n');
+            stream.markdown('- Include inline documentation\n');
+            stream.markdown('- Consider modular architecture\n\n');
+        }
+        // Show shell command validation summary
+        if (detectedCommands) {
+            stream.markdown('## 🔧 Command Validation\n');
+            stream.markdown(`✅ Command syntax validated for ${commandValidator.getShellInfo().type}\n`);
+            stream.markdown('⚠️ **Important:** Verify compilation output before running dependent commands\n\n');
+        }
+        // Quality checklist
+        stream.markdown('## Quality Checklist ✓\n');
+        stream.markdown('- [ ] Error handling implemented\n');
+        stream.markdown('- [ ] Input validation added\n');
+        stream.markdown('- [ ] Code documented\n');
+        stream.markdown('- [ ] Performance considered\n');
+        stream.markdown('- [ ] Security implications reviewed\n');
+        stream.markdown('- [ ] Tests planned/implemented\n\n');
+        stream.markdown('💡 **Next Steps:** Use @brewhand with specific requirements for production-ready code generation.');
         telemetryService.trackEvent('chat_interaction', {
             prompt_length: request.prompt.length,
-            complexity_scope: analysis.scope
+            complexity_scope: analysis.scope,
+            commands_detected: detectedCommands ? detectedCommands.length : 0
         });
     }
     catch (error) {
         stream.markdown('🍺 Sorry, I encountered an error. Please try again.');
+        console.error('BrewHand chat error:', error);
     }
 }
+function getComplexityLevel(score) {
+    if (score >= 80)
+        return 'High';
+    if (score >= 60)
+        return 'Medium-High';
+    if (score >= 40)
+        return 'Medium';
+    if (score >= 20)
+        return 'Low-Medium';
+    return 'Low';
+}
 async function handleShellCommand(request, stream) {
-    const result = await commandValidator.validateAndExecuteCommand(request.prompt, stream);
-    if (!result.success && result.errors) {
-        stream.markdown('\n❌ **Command Issues Found:**\n');
-        result.errors.forEach(error => stream.markdown(`- ${error}\n`));
+    stream.markdown('🔧 **Shell Command Analysis & Validation**\n\n');
+    // Extract potential commands from the request
+    const shellCommandPattern = /(?:cd|npm|yarn|git|tsc|node|python|pip|cargo|go|docker|kubectl|dotnet|mvn|gradle)\s+[^\n]+/gi;
+    const detectedCommands = request.prompt.match(shellCommandPattern);
+    const shellInfo = commandValidator.getShellInfo();
+    stream.markdown(`🖥️ **Current Shell:** ${shellInfo.type}\n`);
+    stream.markdown(`🔗 **Command Separator:** \`${shellInfo.separator}\`\n\n`);
+    if (detectedCommands && detectedCommands.length > 0) {
+        stream.markdown('**📋 Commands Found:**\n');
+        for (const command of detectedCommands) {
+            const formatted = new commandFormatter_1.CommandFormatter();
+            const validation = formatted.validateSyntax(command.trim());
+            stream.markdown(`\n**Command:** \`${command.trim()}\`\n`);
+            if (validation.valid) {
+                stream.markdown('✅ **Status:** Syntax is correct for your shell\n');
+            }
+            else {
+                stream.markdown('❌ **Status:** Syntax issues detected\n');
+                validation.issues.forEach(issue => {
+                    stream.markdown(`   - ${issue}\n`);
+                });
+                if (validation.fixed) {
+                    stream.markdown(`\n✅ **Corrected:** \`${validation.fixed}\`\n`);
+                    // Offer to copy the corrected command
+                    stream.button({
+                        command: 'vscode.env.clipboard.writeText',
+                        arguments: [validation.fixed],
+                        title: 'Copy Corrected Command'
+                    });
+                }
+            }
+        }
+        // General shell tips
+        stream.markdown('\n## 💡 Shell Best Practices\n');
+        if (shellInfo.type === 'powershell') {
+            stream.markdown('- Use `;` to separate commands: `command1; command2`\n');
+            stream.markdown('- Use `&&` for conditional execution: `command1 && command2`\n');
+            stream.markdown('- Quote paths with spaces: `cd "My Folder"`\n');
+        }
+        else {
+            stream.markdown('- Use `&&` for conditional execution: `command1 && command2`\n');
+            stream.markdown('- Use `;` to always run next command: `command1; command2`\n');
+            stream.markdown('- Quote paths with spaces: `cd "My Folder"`\n');
+        }
     }
-    if (result.suggestions) {
-        stream.markdown('\n💡 **Suggestions:**\n');
-        result.suggestions.forEach(suggestion => stream.markdown(`- ${suggestion}\n`));
+    else {
+        stream.markdown('🔍 **No specific commands detected in your message.**\n\n');
+        stream.markdown('**Common Shell Commands:**\n');
+        stream.markdown(`- Build: \`npm run build\`\n`);
+        stream.markdown(`- Install dependencies: \`npm install\`\n`);
+        stream.markdown(`- Navigate: \`cd project-folder\`\n`);
+        stream.markdown(`- Chain commands: \`cd project-folder${shellInfo.separator} npm install\`\n\n`);
     }
+    // Try to execute validation if user asks for it
+    if (request.prompt.toLowerCase().includes('validate') ||
+        request.prompt.toLowerCase().includes('check') ||
+        request.prompt.toLowerCase().includes('fix')) {
+        const result = await commandValidator.validateAndExecuteCommand(request.prompt, stream);
+        if (!result.success && result.errors) {
+            stream.markdown('\n❌ **Validation Issues:**\n');
+            result.errors.forEach(error => stream.markdown(`- ${error}\n`));
+        }
+        if (result.suggestions) {
+            stream.markdown('\n💡 **Suggestions:**\n');
+            result.suggestions.forEach(suggestion => stream.markdown(`- ${suggestion}\n`));
+        }
+    }
+    stream.markdown('\n⚠️ **Important:** Always verify command output before running dependent operations.');
 }
 function setupTerminalCommandValidation() {
     // Monitor when commands are typed into the terminal
@@ -460,7 +595,7 @@ function updateBrewHandStatusBar() {
     brewHandStatusBar.text = statusText;
     brewHandStatusBar.tooltip = alwaysActive
         ? `Beer Menu is always active - monitoring for opportunities to help. ${usage.used} of ${usage.limit} premium requests used this month`
-        : `Beer Menu - ${usage.used} of ${usage.limit} premium requests used this month. Click to enable always-active mode`;
+        : `Beer Menu - ${usage.used} of ${usage.limit} premium requests used this month. Click to open BrewHand panel`;
     // Change color based on usage
     if (usage.percentage > 0.9) {
         brewHandStatusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
@@ -537,15 +672,11 @@ function setupCommandMonitoring(context) {
             // Check if clipboard content changed and looks like a shell command
             if (currentClipboard !== lastClipboardContent &&
                 currentClipboard.length > 5 &&
-                currentClipboard.length < 200 &&
-                isLikelyShellCommand(currentClipboard)) {
-                // Check if BrewHand was used recently (within last 30 seconds)
-                const timeSinceLastBrewHand = Date.now() - lastBrewHandUsage;
-                if (timeSinceLastBrewHand > 30000) { // 30 seconds
-                    // Check for shell syntax issues
-                    if (hasShellSyntaxIssues(currentClipboard)) {
-                        showBrewHandSuggestion(currentClipboard);
-                    }
+                currentClipboard.length < 200 && improveCommandDetection(currentClipboard)) {
+                // Enhanced syntax validation
+                const validation = enhanceShellSyntaxDetection(currentClipboard);
+                if (validation.hasIssues && validation.fixed) {
+                    showBrewHandCommandSuggestion(currentClipboard, validation.fixed);
                 }
                 lastClipboardContent = currentClipboard;
             }
@@ -632,6 +763,82 @@ async function showBrewHandSuggestion(command) {
             action: action || 'ignored'
         });
     }
+}
+async function showBrewHandCommandSuggestion(originalCommand, fixedCommand) {
+    const config = vscode.workspace.getConfiguration('brewhand');
+    // Don't show if user has disabled suggestions
+    if (!config.get('showAutoSuggestions', true))
+        return;
+    const action = await vscode.window.showWarningMessage(`🍺 BrewHand detected shell syntax issue: "${originalCommand}"`, 'Fix & Copy', 'Use @brewhand', 'Show Details', 'Ignore');
+    if (action === 'Fix & Copy') {
+        await vscode.env.clipboard.writeText(fixedCommand);
+        vscode.window.showInformationMessage(`✅ Fixed command copied: "${fixedCommand}"`);
+    }
+    else if (action === 'Use @brewhand') {
+        // Open chat and pre-fill with command validation request
+        await vscode.commands.executeCommand('workbench.panel.chat.view.copilot.focus');
+        // Note: VS Code doesn't support pre-filling chat, so we show guidance
+        vscode.window.showInformationMessage('💬 Try: @brewhand validate this command: ' + originalCommand);
+    }
+    else if (action === 'Show Details') {
+        const shellInfo = commandValidator.getShellInfo();
+        vscode.window.showInformationMessage(`🔧 Shell: ${shellInfo.type} | Original: "${originalCommand}" | Fixed: "${fixedCommand}"`);
+    }
+}
+function improveCommandDetection(text) {
+    // Enhanced patterns for better command detection
+    const enhancedPatterns = [
+        /^(cd|npm|yarn|git|tsc|node|python|pip|cargo|go|docker|kubectl|dotnet|mvn|gradle)\s/,
+        /&&|\|\||;/, // Command chaining
+        /npm\s+(install|run|start|build|test)/,
+        /git\s+(clone|pull|push|commit|add|status)/,
+        /cd\s+[^\s]+/,
+        /^\./, // Script execution
+    ];
+    const trimmed = text.trim();
+    // More intelligent filtering
+    if (trimmed.length > 300)
+        return false; // Too long
+    if (trimmed.includes('\n'))
+        return false; // Multi-line
+    if (/(http|https|ftp):\/\//.test(trimmed))
+        return false; // URLs
+    if (/^\w+@\w+/.test(trimmed))
+        return false; // Email addresses
+    if (/^[a-zA-Z]:/.test(trimmed) && !trimmed.includes(' '))
+        return false; // Just drive letters
+    return enhancedPatterns.some(pattern => pattern.test(trimmed));
+}
+function enhanceShellSyntaxDetection(command) {
+    const issues = [];
+    let fixed = command;
+    const shellInfo = commandValidator.getShellInfo();
+    // PowerShell specific issues
+    if (shellInfo.type === 'powershell') {
+        if (command.includes(' && ')) {
+            issues.push('PowerShell uses ";" not "&&" for command separation');
+            fixed = fixed.replace(/ && /g, '; ');
+        }
+        if (command.match(/cd\s+[^"'][^\s]*\s/)) {
+            const hasSpaces = /cd\s+[^"'][^"]*\s/.test(command);
+            if (hasSpaces) {
+                issues.push('PowerShell paths with spaces need quotes');
+                fixed = fixed.replace(/cd\s+([^"'][^\s;]+)/g, 'cd "$1"');
+            }
+        }
+    }
+    else {
+        // Bash/Zsh specific issues
+        if (command.includes(';') && command.includes('cd ')) {
+            issues.push('In Bash/Zsh, use "&&" for conditional command execution after cd');
+            fixed = fixed.replace(/;\s*/g, ' && ');
+        }
+    }
+    return {
+        hasIssues: issues.length > 0,
+        fixed: issues.length > 0 ? fixed : undefined,
+        issues
+    };
 }
 async function showBrewHandReminder() {
     const config = vscode.workspace.getConfiguration('brewhand');
