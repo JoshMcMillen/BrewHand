@@ -42,57 +42,46 @@ export class BrewHandTreeItem extends vscode.TreeItem {
 
 export class FeaturesProvider implements vscode.TreeDataProvider<BrewHandTreeItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<BrewHandTreeItem | undefined | null | void> = new vscode.EventEmitter<BrewHandTreeItem | undefined | null | void>();
-    readonly onDidChangeTreeData: vscode.Event<BrewHandTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
-
-    private features: FeatureItem[] = [
+    readonly onDidChangeTreeData: vscode.Event<BrewHandTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;    private features: FeatureItem[] = [        {
+            label: 'Iterative Mode',
+            description: 'Context-aware workflow assistance',
+            enabled: vscode.workspace.getConfiguration('brewhand').get('enableIterativeSupport', true),
+            configKey: 'brewhand.enableIterativeSupport',
+            tooltip: 'Enable intelligent workflow assistance that remembers context across multiple steps and provides continuous help throughout complex development tasks'
+        },
         {
             label: 'Auto Mode Reminder',
-            description: 'Status bar reminder to use @brewhand',
+            description: 'Chat usage reminders',
             enabled: vscode.workspace.getConfiguration('brewhand').get('autoModeEnabled', false),
             configKey: 'brewhand.autoModeEnabled',
-            tooltip: 'Show reminder in status bar to use @brewhand for quality code generation'
+            tooltip: 'Show periodic reminders in status bar to use @brewhand for enhanced code generation and quality assistance'
         },
         {
             label: 'Strict Mode',
-            description: 'Enforce strict quality requirements',
+            description: 'Production-ready code standards',
             enabled: vscode.workspace.getConfiguration('brewhand').get('strictMode', true),
             configKey: 'brewhand.strictMode',
-            tooltip: 'Enable strict quality requirements (no TODO comments, comprehensive error handling)'
+            tooltip: 'Enforce strict quality standards: eliminates TODO comments, ensures comprehensive error handling, and requires production-ready code patterns'
         },
         {
             label: 'Include Tests',
-            description: 'Auto-generate test suggestions',
+            description: 'Automatic test suggestions',
             enabled: vscode.workspace.getConfiguration('brewhand').get('includeTests', false),
             configKey: 'brewhand.includeTests',
-            tooltip: 'Automatically generate test suggestions with code'
+            tooltip: 'Automatically suggest unit tests and testing strategies when generating code to improve code reliability and maintainability'
         },
         {
             label: 'Shell Command Monitoring',
-            description: 'Monitor terminal for syntax errors',
+            description: 'Real-time terminal error detection',
             enabled: vscode.workspace.getConfiguration('brewhand').get('monitorTerminalCommands', true),
             configKey: 'brewhand.monitorTerminalCommands',
-            tooltip: 'Monitor terminal for shell syntax errors and provide helpful suggestions'
-        },
-        {
+            tooltip: 'Actively monitor your terminal for shell syntax errors and provide real-time suggestions to fix command issues'
+        },        {
             label: 'Auto Fix Shell Syntax',
-            description: 'Automatically fix shell command syntax',
+            description: 'Smart command syntax correction',
             enabled: vscode.workspace.getConfiguration('brewhand').get('autoFixShellSyntax', true),
             configKey: 'brewhand.autoFixShellSyntax',
-            tooltip: 'Automatically fix shell command syntax'
-        },
-        {
-            label: 'Usage Notifications',
-            description: 'Show budget usage notifications',
-            enabled: vscode.workspace.getConfiguration('brewhand').get('showUsageNotifications', true),
-            configKey: 'brewhand.showUsageNotifications',
-            tooltip: 'Show notifications when reaching usage thresholds'
-        },
-        {
-            label: 'Status Bar Usage',
-            description: 'Show usage in status bar',
-            enabled: vscode.workspace.getConfiguration('brewhand').get('showUsageInStatusBar', true),
-            configKey: 'brewhand.showUsageInStatusBar',
-            tooltip: 'Display usage information in the status bar'
+            tooltip: 'Automatically detect and fix shell command syntax errors for your current shell environment (PowerShell, Bash, etc.)'
         }
     ];
 
@@ -145,35 +134,16 @@ export class FeaturesProvider implements vscode.TreeDataProvider<BrewHandTreeIte
 
 export class SettingsProvider implements vscode.TreeDataProvider<BrewHandTreeItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<BrewHandTreeItem | undefined | null | void> = new vscode.EventEmitter<BrewHandTreeItem | undefined | null | void>();
-    readonly onDidChangeTreeData: vscode.Event<BrewHandTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
-
-    private settings: SettingItem[] = [
-        {
-            label: 'Default Model',
-            description: 'LLM model preference',
-            value: vscode.workspace.getConfiguration('brewhand').get('defaultModel', 'auto'),
-            configKey: 'brewhand.defaultModel',
-            type: 'enum',
-            options: ['auto', 'claude-3.5-sonnet', 'gpt-4o', 'gemini-1.5-pro']
-        },
-        {
-            label: 'Budget Limit',
-            description: 'Monthly premium request limit',
-            value: vscode.workspace.getConfiguration('brewhand').get('budgetLimit', 300),
-            configKey: 'brewhand.budgetLimit',
-            type: 'number'
-        },
-        {
-            label: 'Budget Strategy',
-            description: 'How to manage premium usage',
-            value: vscode.workspace.getConfiguration('brewhand').get('budgetStrategy', 'balanced'),
-            configKey: 'brewhand.budgetStrategy',
-            type: 'enum',
-            options: ['conservative', 'balanced', 'aggressive']
+    readonly onDidChangeTreeData: vscode.Event<BrewHandTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;    private settings: SettingItem[] = [        {
+            label: 'Iterative Assistance',
+            description: 'Intelligent workflow support with context memory',
+            value: vscode.workspace.getConfiguration('brewhand').get('enableIterativeSupport', true),
+            configKey: 'brewhand.enableIterativeSupport',
+            type: 'boolean'
         },
         {
             label: 'Architectural Focus',
-            description: 'Primary focus for code generation',
+            description: 'Primary principle for code generation',
             value: vscode.workspace.getConfiguration('brewhand').get('architecturalFocus', 'balanced'),
             configKey: 'brewhand.architecturalFocus',
             type: 'enum',
@@ -181,7 +151,7 @@ export class SettingsProvider implements vscode.TreeDataProvider<BrewHandTreeIte
         },
         {
             label: 'Shell Detection',
-            description: 'Shell type detection method',
+            description: 'Shell environment auto-detection',
             value: vscode.workspace.getConfiguration('brewhand').get('shellDetection', 'auto'),
             configKey: 'brewhand.shellDetection',
             type: 'enum',

@@ -97,34 +97,10 @@ export class BudgetManager {
     // Update status bar with enhanced context
     this.updateStatusBarWithContext();
   }
-
   private updateStatusBarWithContext() {
-    const remaining = this.getRemainingBudget();
-    const limit = this.config.monthlyLimit;
-    const usagePercent = Math.round((this.monthlyUsage / limit) * 100);
-    
-    // Visual indicators based on budget status
-    let icon = '🔋'; // Default battery icon
-    let color: vscode.ThemeColor | undefined;
-    
-    if (usagePercent >= 90) {
-      icon = '⚠️';  // Warning for high usage
-      color = new vscode.ThemeColor('statusBarItem.warningBackground');
-    } else if (usagePercent >= 75) {
-      icon = '🟡';  // Yellow for moderate usage
-      color = new vscode.ThemeColor('statusBarItem.warningBackground');
-    } else if (usagePercent >= 50) {
-      icon = '🟢';  // Green for normal usage
-    } else {
-      icon = '🔋';  // Full battery for low usage
-    }
-    
-    // Enhanced status text with strategy context
-    const strategyTip = this.getStrategyTip();
-    this.statusBarItem.text = `${icon} BrewHand: ${remaining}/${limit} (${usagePercent}%)`;
-    this.statusBarItem.tooltip = `BrewHand Budget Status\n\nRemaining: ${remaining} requests\nUsed: ${this.monthlyUsage}/${limit} (${usagePercent}%)\nStrategy: ${this.config.budgetStrategy}\n\n💡 ${strategyTip}`;
-    this.statusBarItem.backgroundColor = color;
-    this.statusBarItem.show();
+    // Status bar usage display disabled for simplified UX
+    // Budget tracking still occurs in background but no UI display
+    this.statusBarItem.hide();
   }
 
   private getStrategyTip(): string {
@@ -166,20 +142,10 @@ export class BudgetManager {
     
     this.context.workspaceState.update('monthlyUsage', data);
   }
-  
-  private checkThresholds() {
-    const percentUsed = this.monthlyUsage / this.config.monthlyLimit;
-    const showNotifications = vscode.workspace.getConfiguration('brewhand').get('showUsageNotifications', true);
-    
-    if (!showNotifications) return;
-    
-    if (percentUsed >= 1 && this.monthlyUsage === this.config.monthlyLimit) {
-      vscode.window.showWarningMessage('BrewHand: Monthly premium request limit reached. Using standard models only.');
-    } else if (percentUsed >= 0.8 && Math.floor((this.monthlyUsage - 1) / this.config.monthlyLimit * 100) < 80) {
-      vscode.window.showInformationMessage('BrewHand: 80% of monthly premium requests used.');
-    } else if (percentUsed >= 0.5 && Math.floor((this.monthlyUsage - 1) / this.config.monthlyLimit * 100) < 50) {
-      vscode.window.showInformationMessage('BrewHand: 50% of monthly premium requests used.');
-    }
+    private checkThresholds() {
+    // Budget threshold checking disabled for simplified UX
+    // Tracking still occurs but no notifications are shown
+    return;
   }
   canAffordModel(cost: number): boolean {
     if (!this.config.strictMode) return true;

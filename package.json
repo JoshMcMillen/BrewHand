@@ -1,7 +1,7 @@
 {  "name": "brewhand",
   "displayName": "BrewHand",
   "description": "Enhances GitHub Copilot with 'do it right the first time' philosophy",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "publisher": "BrewCode",
   "engines": {
     "vscode": "^1.93.0"
@@ -31,64 +31,50 @@
         "description": "AI assistant focused on production-ready, high-quality code generation",
         "isSticky": true
       }
-    ],
-    "commands": [
-      {
-        "command": "brewhand.enhanceSelection",
-        "title": "BrewHand: Enhance Selected Code",
-        "category": "BrewHand"
-      },
-      {
-        "command": "brewhand.generateWithQuality",
-        "title": "BrewHand: Generate Quality Code",
-        "category": "BrewHand"
-      },
-      {
-        "command": "brewhand.reviewCode",
-        "title": "BrewHand: Review Code Quality",
-        "category": "BrewHand"
-      },
-      {
-        "command": "brewhand.showUsageDashboard",
-        "title": "BrewHand: Show Usage Dashboard",
-        "category": "BrewHand"
-      },
-      {
-        "command": "brewhand.exportUsageData",
-        "title": "BrewHand: Export Usage Data",
-        "category": "BrewHand"
-      },
-      {
-        "command": "brewhand.showTelemetrySummary",
-        "title": "BrewHand: Show Telemetry Summary",
-        "category": "BrewHand"
-      },
-      {
-        "command": "brewhand.clearTelemetryData",
-        "title": "BrewHand: Clear Telemetry Data",
-        "category": "BrewHand"
-      },
-      {
-        "command": "brewhand.resetUsage",
-        "title": "BrewHand: Reset Monthly Usage",
-        "category": "BrewHand"
-      },
+    ],    "commands": [
       {
         "command": "brewhand.detectShell",
         "title": "BrewHand: Detect Current Shell",
         "category": "BrewHand"
       },
       {
-        "command": "brewhand.formatCommand",        "title": "BrewHand: Format Command for Current Shell",
-        "category": "BrewHand"
-      },      {
-        "command": "brewhand.toggleAutoMode",
-        "title": "BrewHand: Toggle Chat Reminder",
+        "command": "brewhand.validateCommand",
+        "title": "BrewHand: Validate Command Syntax",
         "category": "BrewHand"
       },
       {
-        "command": "brewhand.toggleAlwaysActive",
-        "title": "BrewHand: Toggle Always Active Mode",
+        "command": "brewhand.toggleEnhancedMode",
+        "title": "BrewHand: Toggle Enhanced AI Mode",
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.showShellReference",
+        "title": "BrewHand: Show Shell Reference",
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.toggleIterativeMode",
+        "title": "BrewHand: Toggle Iterative Support",
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.continueWorkflow",
+        "title": "BrewHand: Continue Workflow",
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.pauseWorkflow",
+        "title": "BrewHand: Pause Workflow",
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.showWorkflowSummary",
+        "title": "BrewHand: Show Workflow Summary",
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.clearWorkflowHistory",
+        "title": "BrewHand: Clear Workflow History",
         "category": "BrewHand"
       },
       {
@@ -107,12 +93,12 @@
         "title": "BrewHand: Open Settings", 
         "category": "BrewHand",
         "icon": "$(gear)"
-      },
-      {
-        "command": "brewhand.refreshViews",        "title": "Refresh",
+      },      {
+        "command": "brewhand.refreshViews",
+        "title": "Refresh",
         "icon": "$(refresh)"
       }
-    ],    "viewsContainers": {
+    ],"viewsContainers": {
       "activitybar": [
         {
           "id": "brewhand-panel",
@@ -127,73 +113,52 @@
           "id": "brewhand-features",
           "name": "Features",
           "when": "true"
-        },
-        {
+        },        {
           "id": "brewhand-settings",
           "name": "Quick Settings", 
-          "when": "true"
-        },
-        {
-          "id": "brewhand-usage",
-          "name": "Usage & Stats",
           "when": "true"
         }
       ]
     },
-    "menus": {
-      "editor/context": [
+    "menus": {      "editor/context": [
         {
-          "command": "brewhand.enhanceSelection",
-          "when": "editorHasSelection",
-          "group": "brewhand"
-        },
-        {
-          "command": "brewhand.reviewCode",
+          "command": "brewhand.validateCommand",
+          "when": "editorIsOpen",
           "group": "brewhand"
         }
-      ],
-      "commandPalette": [
-        {
-          "command": "brewhand.enhanceSelection",
-          "when": "editorIsOpen"
-        },
-        {
-          "command": "brewhand.generateWithQuality",
-          "when": "editorIsOpen"
-        },
-        {
-          "command": "brewhand.reviewCode",
-          "when": "editorIsOpen"
-        },
-        {
-          "command": "brewhand.showUsageDashboard"
-        },
-        {
-          "command": "brewhand.exportUsageData"
-        },
-        {
-          "command": "brewhand.showTelemetrySummary"
-        },
-        {
-          "command": "brewhand.clearTelemetryData"
-        },
-        {
-          "command": "brewhand.resetUsage"
-        },
+      ],"commandPalette": [
         {
           "command": "brewhand.detectShell"
         },
         {
-          "command": "brewhand.formatCommand"
-        },        {
-          "command": "brewhand.toggleAutoMode"
+          "command": "brewhand.validateCommand",
+          "when": "editorIsOpen"
         },
         {
-          "command": "brewhand.toggleAlwaysActive"
+          "command": "brewhand.toggleEnhancedMode"
+        },
+        {
+          "command": "brewhand.showShellReference"
+        },
+        {
+          "command": "brewhand.toggleIterativeMode"
+        },
+        {
+          "command": "brewhand.continueWorkflow"
+        },
+        {
+          "command": "brewhand.pauseWorkflow"
+        },
+        {
+          "command": "brewhand.showWorkflowSummary"
+        },
+        {
+          "command": "brewhand.clearWorkflowHistory"
         },
         {
           "command": "brewhand.openFeatures"
-        },        {
+        },
+        {
           "command": "brewhand.openSettings"
         }
       ],
@@ -202,15 +167,9 @@
           "command": "brewhand.refreshViews",
           "when": "view == brewhand-features",
           "group": "navigation"
-        },
-        {
+        },        {
           "command": "brewhand.refreshViews",
           "when": "view == brewhand-settings",
-          "group": "navigation"
-        },
-        {
-          "command": "brewhand.refreshViews", 
-          "when": "view == brewhand-usage",
           "group": "navigation"
         }
       ],
@@ -226,58 +185,30 @@
           "group": "inline"
         }
       ]
-    },
-    "keybindings": [
+    },    "keybindings": [
       {
-        "command": "brewhand.enhanceSelection",
+        "command": "brewhand.validateCommand",
         "key": "ctrl+shift+q",
         "mac": "cmd+shift+q",
-        "when": "editorTextFocus && editorHasSelection"
+        "when": "editorTextFocus"
       },
       {
-        "command": "brewhand.generateWithQuality",
+        "command": "brewhand.toggleIterativeMode",
         "key": "ctrl+shift+g",
-        "mac": "cmd+shift+g",
-        "when": "editorTextFocus"
+        "mac": "cmd+shift+g"
       }
     ],
     "configuration": {
-      "title": "BrewHand",
-      "properties": {
-        "brewhand.defaultModel": {
-          "type": "string",
-          "default": "auto",
-          "enum": [
-            "auto",
-            "claude-opus-4",
-            "claude-sonnet-4",
-            "claude-3.7-sonnet",
-            "claude-3.7-sonnet-thinking",
-            "claude-3.5-sonnet",
-            "gpt-4.5",
-            "gpt-4.1",
-            "gpt-4o",
-            "o3",
-            "o3-mini",
-            "o4-mini",
-            "o1-preview",
-            "o1-mini",
-            "o1",
-            "gemini-2.5-pro",
-            "gemini-2.0-flash",
-            "gemini-1.5-pro"
-          ],
-          "description": "Default LLM model preference (auto-selects best available for your subscription)"
-        },
+      "title": "BrewHand",      "properties": {
         "brewhand.strictMode": {
           "type": "boolean",
           "default": true,
-          "description": "Enable strict quality requirements (no TODO comments, comprehensive error handling)"
+          "description": "Enforce strict quality standards: eliminates TODO comments, ensures comprehensive error handling, and requires production-ready code patterns"
         },
         "brewhand.includeTests": {
           "type": "boolean",
           "default": false,
-          "description": "Automatically generate test suggestions with code"
+          "description": "Automatically suggest unit tests and testing strategies when generating code to improve code reliability and maintainability"
         },
         "brewhand.architecturalFocus": {
           "type": "string",
@@ -288,54 +219,7 @@
             "security",
             "scalability",
             "balanced"
-          ],
-          "description": "Primary architectural focus for code generation"
-        },
-        "brewhand.budgetLimit": {
-          "type": "number",
-          "default": 300,
-          "minimum": 0,
-          "description": "Monthly premium request limit (based on your GitHub Copilot plan)"
-        },
-        "brewhand.budgetWarningThreshold": {
-          "type": "number",
-          "default": 0.8,
-          "minimum": 0,
-          "maximum": 1,
-          "description": "Warning threshold as percentage of budget (0.8 = 80%)"
-        },
-        "brewhand.budgetStrictMode": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enforce strict budget limits (prevents using premium models when over budget)"
-        },
-        "brewhand.budgetResetDate": {
-          "type": "number",
-          "default": 1,
-          "minimum": 1,
-          "maximum": 28,
-          "description": "Day of month when usage resets (1-28)"
-        },
-        "brewhand.budgetStrategy": {
-          "type": "string",
-          "default": "balanced",
-          "enum": [
-            "conservative",
-            "balanced",
-            "aggressive"
-          ],
-          "description": "Budget strategy: conservative (preserve premium), balanced (smart usage), aggressive (use premium freely)"
-        },
-        "brewhand.showUsageNotifications": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show notifications when reaching usage thresholds"
-        },
-        "brewhand.showUsageInStatusBar": {
-          "type": "boolean",
-          "default": true,
-          "description": "Display usage information in the status bar"
-        },
+          ],          "description": "Primary architectural principle to emphasize in code generation: performance (speed/memory), maintainability (readability/structure), security (safe practices), scalability (growth-ready), or balanced (all principles)"        },
         "brewhand.telemetry.enabled": {
           "type": "boolean",
           "default": false,
@@ -360,27 +244,27 @@
         "brewhand.autoFixShellSyntax": {
           "type": "boolean",
           "default": true,
-          "description": "Automatically fix shell command syntax"
+          "description": "Automatically detect and fix shell command syntax errors for your current shell environment (PowerShell, Bash, etc.)"
         },
         "brewhand.blockOnCompileErrors": {
           "type": "boolean",
           "default": true,
-          "description": "Prevent running dependent commands after compilation failures"
+          "description": "Prevent running commands that depend on compilation when build errors are detected to avoid cascading failures"
         },
         "brewhand.showCommandCorrections": {
           "type": "boolean",
           "default": true,
-          "description": "Show command syntax corrections before execution"
+          "description": "Display command syntax corrections and alternatives before executing commands to help you learn proper shell syntax"
         },
         "brewhand.monitorTerminalCommands": {
           "type": "boolean",
           "default": true,
-          "description": "Monitor terminal for shell syntax errors and provide helpful suggestions"
+          "description": "Actively monitor your terminal for shell syntax errors and provide real-time suggestions to fix command issues"
         },
         "brewhand.verifyImportPaths": {
           "type": "boolean",
           "default": true,
-          "description": "Verify and suggest corrections for import path errors"
+          "description": "Validate and auto-correct import paths in your code to prevent module resolution errors and broken dependencies"
         },        "brewhand.autoModeEnabled": {
           "type": "boolean",
           "default": false,
@@ -400,11 +284,48 @@
           "type": "boolean",
           "default": true,
           "description": "Show periodic reminders to use @brewhand for better commands"
-        },
-        "brewhand.lastReminderTime": {
+        },        "brewhand.lastReminderTime": {
           "type": "number",
           "default": 0,
           "description": "Internal: Last time a reminder was shown"
+        },
+        "brewhand.enhancedAIMode": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable advanced AI responses that understand your shell environment and generate platform-specific, syntactically correct commands"
+        },
+        "brewhand.preventIncorrectSyntax": {
+          "type": "boolean",
+          "default": true,
+          "description": "Proactively prevent AI from generating shell commands with incorrect syntax by injecting shell-specific context into AI requests"
+        },
+        "brewhand.autoCorrectCommands": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically validate and correct shell commands generated by AI to ensure they work correctly in your environment"
+        },        "brewhand.includeEducationalTips": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include helpful educational tips and best practices specific to your shell environment in AI responses to improve your command-line skills"
+        },
+        "brewhand.enableIterativeSupport": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable intelligent workflow assistance that remembers context across multiple steps and provides continuous help throughout complex development tasks"        },
+        "brewhand.showIterativeSuggestions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show helpful suggestions to enable iterative assistance when BrewHand detects you're working on multi-step development patterns"
+        },
+        "brewhand.lastIterativeSuggestion": {
+          "type": "number",
+          "default": 0,
+          "description": "Internal: Last time an iterative suggestion was shown"
+        },
+        "brewhand.workflowTimeout": {
+          "type": "number",
+          "default": 7200000,
+          "description": "Time in milliseconds after which workflow contexts expire (default: 2 hours)"
         }
       }
     }

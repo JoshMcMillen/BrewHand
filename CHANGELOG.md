@@ -5,6 +5,75 @@ All notable changes to the BrewHand extension will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# Changelog
+
+All notable changes to the BrewHand extension will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.3] - 2025-06-10
+
+### 🔧 **Settings Simplification**
+- **Unified Iterative Mode** - Consolidated `continuousAssistanceMode` and `enableIterativeSupport` into a single intuitive setting
+- **Removed Complex UI** - Temporarily removed default model selection and budget management UI for better user experience
+- **Streamlined Interface** - Focused on core functionality with cleaner, more accessible controls
+- **Removed Usage Notifications** - Disabled usage tracking notifications and status bar display for cleaner UX
+- **Removed Status Bar Usage Display** - Eliminated budget tracking from status bar to focus on core functionality
+
+### 🍺 **Enhanced User Experience** 
+- **Beer Menu Status Bar** - Changed status bar text from "BrewHand [CONTINUOUS]" to friendly "🍺 Beer Menu"
+- **Simplified Quick Settings** - Removed confusing budget and model options from settings panel
+- **Enhanced Setting Descriptions** - Comprehensive, helpful tooltips and descriptions for all settings and features:
+  - Detailed explanations for each configuration option
+  - Context-aware descriptions that explain the impact of each setting
+  - Educational guidance to help users understand shell syntax features
+  - Clear architectural focus explanations (performance, maintainability, security, etc.)
+- **Improved Feature Labels** - Enhanced clarity in Beer Menu panel with better descriptions
+- **Marketplace-Ready Documentation** - Updated README with VS Code Marketplace focused content
+
+### 🐛 **Bug Fixes**
+- **Improved Shell Syntax Detection** - Fixed regex pattern to catch `&&` syntax errors with or without spaces in PowerShell
+- **Better Command Validation** - Enhanced detection of cross-shell syntax issues
+
+### 🎯 **User Interface Improvements**
+- **Removed Usage View** - Temporarily removed usage tracking panel to focus on core features
+- **Consolidated Settings** - Single "Iterative Assistance" toggle instead of multiple confusing modes
+- **Cleaner Activity Panel** - Beer Menu now shows only Features and Quick Settings
+- **Better Feature Labels** - Improved clarity of feature names and descriptions in Beer Menu panel
+
+### 📋 **Documentation Updates**
+- **VS Code Marketplace Focus** - Restructured README for better marketplace presentation
+- **Simplified Getting Started** - Clear, step-by-step instructions for new users
+- **Better Feature Organization** - Grouped features logically for easier understanding
+
+### 🔧 **Technical Changes**
+- Removed `brewhand.continuousAssistanceMode` configuration option
+- Disabled `showUsageNotifications` and `showUsageInStatusBar` configurations  
+- **Command Palette Cleanup** - Removed 11 unimplemented commands to prevent user confusion:
+  - Removed: `enhanceSelection`, `generateWithQuality`, `reviewCode`
+  - Removed: `showUsageDashboard`, `exportUsageData`, `showTelemetrySummary`
+  - Removed: `clearTelemetryData`, `resetUsage`, `formatCommand`
+  - Removed: `toggleAutoMode`, `toggleAlwaysActive`
+  - **Kept Only Working Commands**: 13 implemented commands remain for a clean, functional command palette
+- Updated keybindings to reflect available commands
+- Cleaned up context menus to show only functional options
+- Removed `brewhand.defaultModel` configuration panel (functionality preserved)
+- Removed `brewhand.budgetLimit`, `brewhand.budgetStrategy` from UI (functionality preserved)
+- Updated status bar text and tooltip generation
+- Streamlined view provider registration
+
+### 📝 **Notes for Users**
+- **Settings Migration**: Existing continuous mode settings automatically convert to iterative mode
+- **Hidden Features**: Budget and model management still work internally but are not exposed in UI
+- **Future Updates**: Complex features will return in future versions with better UX
+
+### 🎯 **Key Innovation**
+**Before**: AI generates `cd project && npm install` → User copies → Command fails in PowerShell → User manually fixes
+**After**: AI receives PowerShell context → Generates `cd "project"; npm install` → Command works immediately
+
+This represents a fundamental shift from **reactive correction** to **proactive prevention** of shell syntax issues.
+
 ## [1.0.2] - 2025-06-08
 
 ### 🧹 **Workspace & Code Quality**

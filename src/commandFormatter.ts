@@ -31,27 +31,28 @@ export class CommandFormatter {
     
     return command;
   }
-  
-  validateSyntax(command: string): { valid: boolean; fixed?: string; issues: string[] } {
+    validateSyntax(command: string): { valid: boolean; fixed?: string; issues: string[] } {
     const issues: string[] = [];
     let fixed = command;
     
     // Check for wrong separators
     if (this.shellInfo.type === 'powershell') {
-      if (command.includes(' && ')) {
+      // Match && with or without spaces around it
+      if (command.match(/\s*&&\s*/)) {
         issues.push('PowerShell uses ; not && for command separation');
-        fixed = fixed.replace(/ && /g, this.shellInfo.separator);
+        fixed = fixed.replace(/\s*&&\s*/g, this.shellInfo.separator);
       }
     } else if (this.shellInfo.type === 'bash' || this.shellInfo.type === 'zsh') {
-      // Check for PowerShell syntax in bash/zsh
+      // Check for PowerShell syntax in bash/zsh (semicolon not followed by another semicolon)
       if (command.match(/;\s*(?!;)/)) {
         issues.push('Bash/Zsh uses && not ; for conditional command execution');
         fixed = fixed.replace(/;\s*(?!;)/g, this.shellInfo.separator);
       }
     } else if (this.shellInfo.type === 'cmd') {
-      if (command.includes(' && ')) {
+      // Match && with or without spaces for CMD
+      if (command.match(/\s*&&\s*/)) {
         issues.push('CMD uses & not && for command separation');
-        fixed = fixed.replace(/ && /g, this.shellInfo.separator);
+        fixed = fixed.replace(/\s*&&\s*/g, this.shellInfo.separator);
       }
     }
     

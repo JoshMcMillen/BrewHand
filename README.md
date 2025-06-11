@@ -2,70 +2,59 @@
 
 > Production-Ready AI Development Assistant for VS Code
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/Version-1.0.2-blue.svg)](https://marketplace.visualstudio.com/items?itemName=BrewCode.brewhand)
+[![Version](https://img.shields.io/badge/Version-1.0.3-blue.svg)](https://marketplace.visualstudio.com/items?itemName=BrewCode.brewhand)
+[![Ko-fi](https://img.shields.io/badge/Support%20me%20on-Ko--fi-FF5E5B.svg)](https://ko-fi.com/joshmc)
 
-**BrewHand** is a comprehensive VS Code extension that enhances AI-powered development with production-ready code generation, intelligent shell command validation, budget management, and quality-first development principles.
+> 💡 *Tips are appreciated to support ongoing development and new features!*
 
-## 🆕 What's New in v1.0.2
+**BrewHand** is a comprehensive VS Code extension that enhances AI-powered development with production-ready code generation, intelligent shell command validation, and quality-first development principles.
 
-### **Quality Assurance & Assessment** 📊
-- **Configuration analysis tools** for validating extension setup
-- **Effectiveness measurement framework** to track code quality improvements
-- **Workspace cleanup and organization** with proper test file structure
-- **Installation verification** tools to ensure BrewHand is working correctly
+## 🆕 What's New in v1.0.3
 
-### **Enhanced Development Experience** 🧹
-- **Clean workspace structure** with organized test directories
-- **Assessment notebook** for comprehensive extension analysis
-- **Documentation updates** reflecting current state and capabilities
-- **Quality measurement tools** to verify BrewHand's impact on development
+### **🔧 Simplified Settings** 
+- **Unified Iterative Mode** - Consolidated continuous and iterative modes into a single, intuitive setting
+- **Streamlined Interface** - Removed complex budget and model selection UI for better user experience  
+- **Beer Menu** - Clean, friendly interface accessible from the status bar
+
+### **🍺 Enhanced User Experience**
+- **Beer Menu Status Bar** - Click the 🍺 Beer Menu in the status bar for quick access to features
+- **Simplified Configuration** - Focus on core functionality with fewer confusing options
+- **Better Tooltips** - Clear guidance on what each feature does
 
 [View Full Changelog](CHANGELOG.md)
 
 ## ✨ Key Features
 
 ### 🎯 **Quality-First AI Development**
-- **Production-ready code generation** with comprehensive error handling
-- **Architectural best practices** for performance, maintainability, security, and scalability
+- **Production-ready code generation** with comprehensive error handling and best practices
+- **Architectural guidance** for performance, maintainability, security, and scalability
 - **Multi-language support** for JavaScript, TypeScript, Python, Java, C#, Go, Rust, and more
-- **Complexity analysis engine** that adapts AI responses to task difficulty
+- **Complexity analysis** that adapts AI responses to task difficulty
 
 ### 🐚 **Intelligent Shell Command System**
-- **Automatic shell detection** (PowerShell, CMD, Bash, Zsh)
+- **Automatic shell detection** (PowerShell, CMD, Bash, Zsh) with platform-specific formatting
 - **Command syntax validation** and correction before execution
-- **Cross-platform command formatting** for different shell environments
-- **Compilation error detection** with dependency blocking
-- **Terminal monitoring** with real-time command validation
+- **Cross-platform compatibility** ensuring commands work on your specific environment
+- **Error prevention** with proactive syntax checking and educational tips
 
 ### 🧠 **Smart AI Chat Integration**
-- **@brewhand chat participant** with quality-focused responses
-- **Context-aware conversations** that understand your project structure
-- **Budget-aware model selection** automatically choosing optimal AI models
-- **Always-active monitoring** for proactive shell command assistance
-- **Auto-suggestions** when syntax errors are detected in commands
-- **Smart reminders** to use @brewhand for better development workflow
-- **Visual chat reminder** in status bar for consistent @brewhand usage
-- **Follow-up suggestions** for error handling, testing, and architecture review
+- **@brewhand chat participant** integrated directly into VS Code's chat interface
+- **Iterative workflow support** - Maintains context throughout multi-step development processes
+- **Context-aware conversations** that understand your project structure and coding patterns
+- **Enhanced AI responses** with shell-aware command generation and validation
+- **Educational integration** - Learn best practices while you code
 
-### 📊 **Advanced Budget & Usage Management**
-- **Visual status bar tracking** with real-time budget indicators
-- **Intelligent model selection** based on complexity and budget constraints
-- **Usage analytics dashboard** with detailed cost breakdowns
-- **Flexible budget strategies** (Conservative, Balanced, Aggressive)
-- **Monthly usage reset** with customizable reset dates
+### 🔍 **Code Quality & Analysis Tools**  
+- **Import path resolution** with automatic error detection and intelligent suggestions
+- **Error parsing system** for compilation and runtime errors with actionable fixes
+- **Code complexity scoring** with recommendations for simplification and optimization
+- **Architectural pattern suggestions** based on comprehensive project analysis
 
-### 🔍 **Code Quality & Analysis Tools**
-- **Import path resolution** with automatic error detection and suggestions
-- **Error parsing system** for compilation and runtime errors
-- **Code complexity scoring** with recommendations for simplification
-- **Architectural pattern suggestions** based on project analysis
-
-### 🔒 **Privacy-First Telemetry**
-- **Local-first data storage** by default
-- **Anonymized sensitive information** (file paths, project names)
-- **Complete control** over data collection and sharing
-- **Optional telemetry** with clear benefit explanations
+### 🔒 **Privacy-First Design**
+- **Local-first data storage** with no external data transmission by default
+- **Anonymized information handling** for file paths and sensitive project details
+- **Complete user control** over data collection and sharing preferences
+- **Transparent telemetry** with clear explanations of benefits and opt-in choices
 
 ## 🚀 Installation
 
@@ -76,421 +65,103 @@
 4. Click **Install**
 
 ### From VSIX File
-1. Download the latest `brewhand-1.0.2.vsix` file
+1. Download the latest `brewhand-1.0.3.vsix` file
 2. Open VS Code
 3. Press `Ctrl+Shift+P` → "Extensions: Install from VSIX..."
 4. Select the downloaded `.vsix` file
 
 ## 🔍 Verifying Installation
 
-### Check Extension Status
+### Quick Check
 ```powershell
 code --list-extensions | findstr brewcode
 ```
 Should return: `brewcode.brewhand`
 
 ### Test Core Functionality
-1. **Open VS Code Chat** and try `@brewhand`
-2. **Check Activity Bar** for the beer mug icon (🍺)
-3. **Command Palette** → Search "BrewHand" to see available commands
-4. **Status Bar** should show BrewHand usage information
+1. **Open VS Code Chat** (`Ctrl+Shift+I`) and try `@brewhand help`
+2. **Check Beer Menu** - Look for the 🍺 icon in your status bar
+3. **Command Palette** - Press `Ctrl+Shift+P` and search "BrewHand" to see available commands
 
-## 🛠️ Quick Start Guide
+## 🍺 Getting Started
 
-### 1. **Activate BrewHand**
-BrewHand automatically activates when you open supported file types. Look for the BrewHand budget indicator in your status bar.
+### Open the Beer Menu
+Click the **🍺 Beer Menu** in your status bar to access:
+- **Features Panel** - Toggle core functionality on/off
+- **Quick Settings** - Configure BrewHand behavior
+- **Help & Documentation** - Learn more about available features
 
-### 2. **Enable Chat Reminders**
-Click the `⚡ @brewhand Reminder` button in the status bar or use the command:
-```
-BrewHand: Toggle Chat Reminder
-```
+### Using @brewhand in Chat
+1. Open VS Code Chat panel (`Ctrl+Shift+I`)
+2. Type `@brewhand` followed by your request
+3. Ask for shell commands, code generation, or architectural advice
+4. BrewHand will provide validated, production-ready responses
 
-### 3. **Use the AI Chat Participant**
-```
-@brewhand Create a user authentication system with JWT, input validation, and error handling
-```
+### Key Features to Try
+- **Shell Commands**: Ask for platform-specific terminal commands
+- **Code Generation**: Request production-ready code with error handling  
+- **Error Analysis**: Get help understanding and fixing compilation errors
+- **Architecture Advice**: Ask about best practices and design patterns
 
-### 4. **Enhance Existing Code**
-1. Select code in your editor
-2. Right-click → "BrewHand: Enhance Selected Code"
-3. Or use keyboard shortcut `Ctrl+Shift+Q`
+## 🎛️ Available Commands
 
-### 5. **Validate Shell Commands**
-BrewHand automatically detects and validates shell commands in your AI conversations, providing syntax corrections and cross-platform compatibility.
+BrewHand provides 11 focused commands accessible via Command Palette (`Ctrl+Shift+P`):
 
-### 6. **Enable Always-Active Mode (New in v1.0.1)**
-For proactive assistance, enable always-active monitoring:
-```
-BrewHand: Toggle Always Active Mode
-```
-This enables:
-- **Clipboard monitoring** for shell command syntax issues
-- **Automatic suggestions** when BrewHand can help
-- **Smart reminders** to use @brewhand for better commands
-- **Proactive error prevention** before commands fail
+### Core Shell & AI Commands
+- **BrewHand: Detect Current Shell** - Identify your shell environment
+- **BrewHand: Validate Command Syntax** - Check shell command syntax (`Ctrl+Shift+Q`)
+- **BrewHand: Toggle Enhanced AI Mode** - Enable/disable advanced AI responses
+- **BrewHand: Show Shell Reference** - Display shell syntax reference guide
 
-## 📋 System Requirements
+### Workflow Management
+- **BrewHand: Toggle Iterative Support** - Enable continuous workflow assistance (`Ctrl+Shift+G`)
+- **BrewHand: Continue Workflow** - Resume an active development workflow
+- **BrewHand: Pause Workflow** - Temporarily pause iterative assistance
+- **BrewHand: Show Workflow Summary** - View current workflow context and history
+- **BrewHand: Clear Workflow History** - Reset all workflow memory
 
-- **VS Code**: Version 1.93.0 or higher
-- **AI Language Model**: GitHub Copilot, Claude, or compatible language model
-- **Operating Systems**: Windows, macOS, Linux
-- **Node.js**: 16.x or higher (development only)
+### Interface & Settings
+- **BrewHand: Open Features Panel** - Access the Beer Menu features panel
+- **BrewHand: Open Settings** - Configure BrewHand behavior and preferences
 
 ## ⚙️ Configuration
 
-### **Core Settings**
-```json
-{
-  "brewhand.defaultModel": "auto",
-  "brewhand.strictMode": true,
-  "brewhand.includeTests": false,
-  "brewhand.architecturalFocus": "balanced"
-}
-```
-
-### **Budget Management**
-```json
-{
-  "brewhand.budgetLimit": 300,
-  "brewhand.budgetWarningThreshold": 0.8,
-  "brewhand.budgetStrategy": "balanced",
-  "brewhand.showUsageInStatusBar": true
-}
-```
-
-### **Shell Command System**
-```json
-{
-  "brewhand.shellDetection": "auto",
-  "brewhand.autoFixShellSyntax": true,
-  "brewhand.blockOnCompileErrors": true,
-  "brewhand.showCommandCorrections": true
-}
-```
-
-### **Chat Integration**
-```json
-{
-  "brewhand.autoModeEnabled": false,
-  "brewhand.alwaysActive": false,
-  "brewhand.showAutoSuggestions": true,
-  "brewhand.showReminders": true
-}
-```
-
-### **Privacy & Telemetry**
-```json
-{
-  "brewhand.telemetry.enabled": false,
-  "brewhand.telemetry.localStorageOnly": true,
-  "brewhand.telemetry.anonymizeData": true
-}
-```
-
-### **Import Path Resolution**
-```json
-{
-  "brewhand.verifyImportPaths": true
-}
-```
-
-## 🎮 Usage Examples
-
-### **Enhanced JavaScript Code Generation**
-**Before**: Basic function
-```javascript
-function calc(a, b) {
-  return a + b;
-}
-```
-
-**After**: BrewHand enhancement
-```javascript
-/**
- * Performs arithmetic addition with comprehensive error handling
- * @param {number} a - First operand
- * @param {number} b - Second operand
- * @returns {number} Sum of a and b
- * @throws {TypeError} When operands are not numbers
- * @throws {RangeError} When operands are not finite
- */
-function calculateSum(a, b) {
-  if (typeof a !== 'number' || typeof b !== 'number') {
-    throw new TypeError('Both operands must be numbers');
-  }
-  
-  if (!Number.isFinite(a) || !Number.isFinite(b)) {
-    throw new RangeError('Operands must be finite numbers');
-  }
-  
-  return a + b;
-}
-```
-
-### **Shell Command Validation**
-**Input**: `@brewhand How do I install packages and run tests?`
-
-**BrewHand Response**: Detects shell commands and provides validated, cross-platform solutions:
-
-**Windows (PowerShell)**:
-```powershell
-npm install; npm test
-```
-
-**Unix/macOS (Bash)**:
-```bash
-npm install && npm test
-```
-
-### **Budget-Aware Model Selection**
-BrewHand automatically selects the most appropriate AI model based on:
-- Task complexity (analyzed in real-time)
-- Remaining budget
-- Your configured strategy
-- Model capabilities and costs
-
-## 🔧 Complete Command Reference
-
-| Command | Shortcut | Description |
-|---------|----------|-------------|
-| **BrewHand: Enhance Selected Code** | `Ctrl+Shift+Q` | Improve selected code with production-ready patterns |
-| **BrewHand: Generate Quality Code** | `Ctrl+Shift+G` | Generate new code with comprehensive error handling |
-| **BrewHand: Review Code Quality** | - | Analyze code and suggest architectural improvements |
-| **BrewHand: Show Usage Dashboard** | - | View detailed usage analytics and budget status |
-| **BrewHand: Export Usage Data** | - | Export usage data to JSON format |
-| **BrewHand: Show Telemetry Summary** | - | View collected telemetry data summary |
-| **BrewHand: Clear Telemetry Data** | - | Clear all locally stored telemetry data |
-| **BrewHand: Reset Monthly Usage** | - | Reset monthly usage tracking |
-| **BrewHand: Detect Current Shell** | - | Display detected shell type and separator |
-| **BrewHand: Format Command for Current Shell** | - | Format shell commands for current environment |
-| **BrewHand: Toggle Chat Reminder** | - | Toggle status bar reminder to use @brewhand |
-| **BrewHand: Toggle Always Active Mode** | - | Enable/disable always-active monitoring for proactive assistance |
-
-## 📊 Usage Dashboard
-
-The comprehensive dashboard provides:
-
-### **Budget Overview**
-- Visual progress bar showing monthly usage
-- Remaining requests counter
-- Days until monthly reset
-- Strategy-specific recommendations
-
-### **Model Usage Analytics**
-- Distribution of AI models used
-- Cost breakdown by model type
-- Usage patterns over time
-- Efficiency recommendations
-
-### **Quality Metrics**
-- Code enhancement statistics
-- Error prevention tracking
-- Complexity analysis results
-- Architectural improvement suggestions
-
-### **Shell Command Statistics**
-- Command validation success rate
-- Cross-platform compatibility reports
-- Error prevention metrics
-- Most used shell commands
-
-## 🧩 Architecture & Integration
-
-### **Complexity Analysis Engine**
-BrewHand analyzes each request across multiple dimensions:
-- **Technical complexity**: Code patterns, algorithms, architecture
-- **Context requirements**: Project size, dependencies, integration needs
-- **Quality demands**: Error handling, testing, documentation needs
-- **Performance considerations**: Optimization requirements, scalability needs
-
-### **Shell Detection System**
-Advanced shell environment detection supporting:
-- **Windows**: PowerShell Core, Windows PowerShell, Command Prompt
-- **macOS/Linux**: Bash, Zsh, Fish, and other POSIX shells
-- **Cross-platform**: Automatic command syntax translation
-- **Validation**: Pre-execution syntax checking and error prevention
-
-### **Budget Management Strategy**
-Intelligent model selection based on:
-- **Conservative**: Prioritizes cost savings, uses premium models sparingly
-- **Balanced**: Optimal cost-performance ratio for most scenarios
-- **Aggressive**: Uses best available models regardless of cost
-
-## 🔍 Advanced Features
-
-### **Import Path Resolution**
-- Automatically detects and suggests corrections for import path errors
-- Supports relative and absolute path resolution
-- Cross-platform path compatibility checking
-- Integration with popular bundlers and module systems
-
-### **Terminal Monitoring**
-- Real-time command execution tracking
-- Error detection and parsing
-- Compilation failure prevention
-- Dependency blocking for failed builds
-
-### **Error Parsing System**
-- Intelligent error message analysis
-- Contextual suggestions for common errors
-- Integration with popular frameworks and tools
-- Multi-language error pattern recognition
-
-## 🔒 Privacy & Security
-
-### **Data Collection Principles**
-- **Minimal Collection**: Only collect data necessary for functionality
-- **Local Storage**: All data stored locally by default
-- **User Control**: Complete control over what data is collected
-- **Transparency**: Clear explanations of data usage
-
-### **Anonymization Features**
-- Automatic removal of sensitive file paths
-- Project name anonymization
-- User identifier hashing
-- IP address exclusion
-
-### **Security Measures**
-- No external data transmission by default
-- Encrypted local storage for sensitive data
-- Regular security audits and updates
-- Compliance with privacy regulations
-
-## 🐛 Troubleshooting
-
-### **Common Issues**
-
-**BrewHand not activating**
-- Ensure you have a compatible AI language model (GitHub Copilot, etc.)
-- Check if you're working with supported file types
-- Restart VS Code and check the Output panel for errors
-
-**Chat participant (@brewhand) not appearing**
-- Restart VS Code
-- Verify the extension is enabled in Extensions view
-- Check that your AI language model extension is active
-
-**Shell command validation not working**
-- Verify `brewhand.shellDetection` is set to "auto"
-- Check if `brewhand.autoFixShellSyntax` is enabled
-- Ensure you're using supported shell environments
-
-**Budget tracking showing incorrect data**
-- Verify your AI language model subscription is active
-- Check BrewHand settings for correct budget configuration
-- Use "BrewHand: Reset Monthly Usage" if data is corrupted
-
-**Status bar not showing**
-- Enable `brewhand.showUsageInStatusBar` in settings
-- Restart VS Code if the status bar item doesn't appear
-- Check for conflicting extensions that might hide status bar items
-
-### **Performance Issues**
-
-**Slow response times**
-- Check your internet connection
-- Verify AI language model service status
-- Consider switching to a lighter budget strategy
-
-**High memory usage**
-- Clear telemetry data if local storage is large
-- Restart VS Code periodically
-- Check for memory leaks in Output panel
-
-## 📊 Measuring BrewHand Effectiveness
-
-### **Quality Assessment Tools**
-BrewHand v1.0.2 includes comprehensive tools to measure its impact on your development workflow:
-
-**Configuration Analysis Notebook**
-- Run `brewhand-configuration-analysis.ipynb` to validate extension setup
-- Verify all components are properly configured
-- Check for potential installation issues
-
-**Effectiveness Assessment**
-- Use `brewhand-effectiveness-assessment.md` as a guide for measuring improvements
-- Track metrics like error reduction, code review feedback, and development speed
-- Compare code quality before/after using `@brewhand`
-
-### **Key Metrics to Track**
-- **Compilation Error Rate** - Should decrease with BrewHand usage
-- **Code Review Iterations** - Fewer rounds needed for BrewHand-generated code  
-- **Production Bug Rate** - Lower defect rates in released code
-- **Development Speed** - Faster feature completion over time
-- **Code Quality Scores** - Better adherence to best practices
-
-### **Testing BrewHand Effectiveness**
-1. **Create baseline measurements** before regular BrewHand usage
-2. **Use `@brewhand` consistently** for 1-2 weeks
-3. **Compare generated code quality** with previous Copilot output
-4. **Monitor usage dashboard** for insights and recommendations
-5. **Track team feedback** on code review quality improvements
-
-### **Verification Commands**
-```powershell
-# Verify installation
-code --list-extensions | findstr brewcode
-
-# Test core functionality  
-# Use @brewhand in VS Code chat
-# Try keyboard shortcuts: Ctrl+Shift+Q, Ctrl+Shift+G
-# Check Activity Bar for beer mug icon
-```
-
-## 📚 Documentation & Resources
-
-- [Extension Architecture Guide](docs/architecture.md)
-- [API Reference Documentation](docs/api.md)
-- [Configuration Best Practices](docs/configuration.md)
-- [Shell Integration Guide](docs/shell-integration.md)
-- [Budget Management Strategies](docs/budget-strategies.md)
-
-## 🤝 Contributing
-
-We welcome contributions from the developer community!
-
-### **Development Setup**
-```bash
-git clone https://github.com/JoshMcMillen/BrewHand.git
-cd BrewHand
-npm install
-npm run compile
-```
-
-### **Testing**
-```bash
-npm test                    # Run unit tests
-npm run test:integration    # Run integration tests
-npm run lint               # Run linting checks
-```
-
-### **Building**
-```bash
-npm run vscode:prepublish  # Prepare for publishing
-npm run package           # Create VSIX package
-```
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **AI Language Model Providers** for powering the intelligence behind BrewHand
-- **VS Code Team** for the excellent extension API and development tools
-- **Open Source Community** for inspiration, feedback, and contributions
-- **Beta Testers** who helped refine and improve BrewHand's functionality
-
-## 📞 Support & Community
-
-- **Issues & Bugs**: [GitHub Issues](https://github.com/JoshMcMillen/BrewHand/issues)
-- **Feature Requests**: [GitHub Discussions](https://github.com/JoshMcMillen/BrewHand/discussions)
-- **Community Support**: [GitHub Discussions](https://github.com/JoshMcMillen/BrewHand/discussions)
-- **Documentation**: [GitHub Repository](https://github.com/JoshMcMillen/BrewHand)
+BrewHand works great with default settings, but you can customize behavior through:
+
+### Settings Options
+- **Iterative Support** - Enable continuous workflow assistance (default: enabled)
+- **Shell Detection** - Automatic or manual shell type selection
+- **Strict Mode** - Enforce production-ready code standards
+- **Architectural Focus** - Prioritize performance, maintainability, security, or balanced approach
+
+### Access Settings
+1. Click **🍺 Beer Menu** in status bar
+2. Open **Quick Settings** panel
+3. Toggle features or click settings to modify values
+
+## 🎯 Best Practices
+
+### For New Users
+- Start with `@brewhand help` to learn available features
+- Enable **Iterative Support** for multi-step development workflows
+- Use the Beer Menu to familiarize yourself with available features
+
+### For Development Workflows
+- Use `@brewhand` for shell commands to ensure platform compatibility
+- Ask for architectural advice before starting complex features
+- Request code reviews and suggestions for optimization
+
+### For Team Adoption
+- Share BrewHand commands and workflows with your team
+- Use consistent architectural focus settings across projects
+- Leverage educational tips to improve team coding practices
+
+## 🤝 Support & Feedback
+
+- **Issues & Feature Requests**: [GitHub Repository](https://github.com/BrewCode/brewhand)
+- **Support the Project**: [Ko-fi](https://ko-fi.com/joshmc)
+- **Documentation**: Check the Beer Menu for built-in help and references
 
 ---
 
-**🍺 BrewHand: Crafting Quality Code, One Request at a Time**
-
-*Made with ❤️ for developers who believe in doing it right the first time*
+**Made with ❤️ for developers who value quality and reliability**

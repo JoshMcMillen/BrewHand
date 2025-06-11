@@ -1,3 +1,10 @@
 <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-  <path d="M3 4v9a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4H3zm7 1v1h1a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-1v3H4V5h6zM5 3h4v1H5V3z" fill="currentColor"/>
+  <!-- Beer Stein with Handle and Foam -->
+  <path d="M3.5 4v8.5a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V4H3.5z" fill="none" stroke="currentColor" stroke-width="1.2"/>
+  <!-- Handle -->
+  <path d="M10.5 5.5h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1" fill="none" stroke="currentColor" stroke-width="1.2"/>
+  <!-- Foam on top -->
+  <path d="M3.5 4c0-0.5 0.5-1 1-1h5c0.5 0 1 0.5 1 1M4 2.5c0.5-0.5 1.5-0.5 2 0c0.5-0.5 1.5-0.5 2 0c0.5-0.5 1.5-0.5 2 0" fill="none" stroke="currentColor" stroke-width="0.8"/>
+  <!-- Beer content -->
+  <path d="M4 6h6v5H4z" fill="currentColor" opacity="0.5"/>
 </svg>
