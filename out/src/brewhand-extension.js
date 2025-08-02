@@ -1,38 +1,30 @@
 "use strict";
-// BrewHand Extension for VS Code - Clean Version
-// Focused on fixing shell command syntax issues
+// Simplified BrewHand Extension - Focused on Custom Instructions for Agent Mode
+// Streamlined version that emphasizes VS Code's native custom instructions system
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = require("vscode");
-const budgetManager_1 = require("./budgetManager");
-const complexityAnalyzer_1 = require("./complexityAnalyzer");
-const telemetry_1 = require("./telemetry");
 const commandValidator_1 = require("./commandValidator");
 const commandFormatter_1 = require("./commandFormatter");
-const aiResponseEnhancer_1 = require("./aiResponseEnhancer");
+const customInstructionsManager_1 = require("./customInstructionsManager");
 // Global instances
-let budgetManager;
-let complexityAnalyzer;
-let telemetryService;
 let commandValidator;
-let aiResponseEnhancer;
+let customInstructionsManager;
 let statusBarItem;
 // Import view providers
 const viewProviders_1 = require("./viewProviders");
 // Extension activation
 function activate(context) {
-    // Initialize managers with context for iterative support
-    budgetManager = new budgetManager_1.BudgetManager(context);
-    complexityAnalyzer = new complexityAnalyzer_1.ComplexityAnalyzer();
-    telemetryService = new telemetry_1.TelemetryService(context);
+    // Initialize core components
     commandValidator = new commandValidator_1.CommandValidator();
-    aiResponseEnhancer = new aiResponseEnhancer_1.AIResponseEnhancer(context); // Pass context for iterative features
-    // Create status bar item with iterative mode indicator
+    customInstructionsManager = new customInstructionsManager_1.CustomInstructionsManager();
+    // Create status bar item
     statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-    updateStatusBarForIterativeMode();
+    updateStatusBar();
     statusBarItem.show();
-    context.subscriptions.push(statusBarItem); // Register view providers
+    context.subscriptions.push(statusBarItem);
+    // Register view providers
     const featuresProvider = new viewProviders_1.FeaturesProvider();
     const settingsProvider = new viewProviders_1.SettingsProvider();
     // Register tree views
@@ -42,14 +34,31 @@ function activate(context) {
         featuresProvider.refresh();
         settingsProvider.refresh();
     }));
-    // Register toggle feature command
+    // Register toggle feature command with custom instructions support
     context.subscriptions.push(vscode.commands.registerCommand('brewhand.toggleFeature', async (configKey) => {
-        const config = vscode.workspace.getConfiguration();
-        const currentValue = config.get(configKey);
-        await config.update(configKey, !currentValue, vscode.ConfigurationTarget.Global);
+        // Special handling for custom instructions
+        if (configKey === 'brewhand.customInstructions.enabled') {
+            const config = vscode.workspace.getConfiguration();
+            const currentValue = config.get(configKey, false);
+            if (!currentValue) {
+                // Enabling - create custom instructions
+                await vscode.commands.executeCommand('brewhand.createCustomInstructions');
+            }
+            else {
+                // Disabling - remove custom instructions
+                await vscode.commands.executeCommand('brewhand.removeCustomInstructions');
+            }
+        }
+        else {
+            // Standard toggle for other features
+            const config = vscode.workspace.getConfiguration();
+            const currentValue = config.get(configKey);
+            await config.update(configKey, !currentValue, vscode.ConfigurationTarget.Global);
+        }
         featuresProvider.refresh();
+        updateStatusBar();
     }));
-    // Register edit setting command
+    // Register setting edit command
     context.subscriptions.push(vscode.commands.registerCommand('brewhand.editSetting', async (setting) => {
         if (setting.type === 'boolean') {
             const config = vscode.workspace.getConfiguration();
@@ -63,6 +72,12 @@ function activate(context) {
             if (selected) {
                 await vscode.workspace.getConfiguration().update(setting.configKey, selected, vscode.ConfigurationTarget.Global);
                 settingsProvider.refresh();
+                // Update custom instructions if they exist and auto-update is enabled
+                const config = vscode.workspace.getConfiguration('brewhand');
+                if (config.get('customInstructions.enabled', false) &&
+                    config.get('customInstructions.autoUpdate', false)) {
+                    await updateCustomInstructions();
+                }
             }
         }
         else {
@@ -77,15 +92,15 @@ function activate(context) {
             }
         }
     }));
-    // Register chat participant
-    const brewhandParticipant = vscode.chat.createChatParticipant('brewhand', handleBrewHandChat);
+    // Register simplified chat participant (optional - for ask mode compatibility)
+    const brewhandParticipant = vscode.chat.createChatParticipant('brewhand', handleSimplifiedChat);
     brewhandParticipant.iconPath = vscode.Uri.joinPath(context.extensionUri, 'icons', 'beer-mug.svg');
-    context.subscriptions.push(brewhandParticipant); // Register commands including new iterative workflow commands
-    context.subscriptions.push(vscode.commands.registerCommand('brewhand.detectShell', () => {
-        const shellInfo = commandValidator.getShellInfo();
-        vscode.window.showInformationMessage(`🔧 Detected Shell: ${shellInfo.type} | Correct separator: "${shellInfo.separator}"`);
-    }), vscode.commands.registerCommand('brewhand.validateCommand', validateCommand), vscode.commands.registerCommand('brewhand.toggleEnhancedMode', toggleEnhancedMode), vscode.commands.registerCommand('brewhand.showShellReference', showShellReference), 
-    // Beer Menu navigation commands
+    context.subscriptions.push(brewhandParticipant);
+    // Register core commands
+    context.subscriptions.push(
+    // Basic shell commands
+    vscode.commands.registerCommand('brewhand.detectShell', detectShell), vscode.commands.registerCommand('brewhand.validateCommand', validateCommand), vscode.commands.registerCommand('brewhand.showShellReference', showShellReference), 
+    // Beer Menu navigation
     vscode.commands.registerCommand('brewhand.openFeatures', () => {
         vscode.commands.executeCommand('workbench.view.extension.brewhand-panel');
         vscode.commands.executeCommand('brewhand-features.focus');
@@ -93,258 +108,46 @@ function activate(context) {
         vscode.commands.executeCommand('workbench.view.extension.brewhand-panel');
         vscode.commands.executeCommand('brewhand-settings.focus');
     }), 
-    // New iterative workflow commands
-    vscode.commands.registerCommand('brewhand.toggleIterativeMode', toggleIterativeMode), vscode.commands.registerCommand('brewhand.continueWorkflow', continueWorkflow), vscode.commands.registerCommand('brewhand.pauseWorkflow', pauseWorkflow), vscode.commands.registerCommand('brewhand.showWorkflowSummary', showWorkflowSummary), vscode.commands.registerCommand('brewhand.clearWorkflowHistory', clearWorkflowHistory));
-    // Monitor workspace for iterative patterns
-    setupIterativeWorkflowMonitoring(context);
+    // Custom instructions commands (main focus)
+    vscode.commands.registerCommand('brewhand.createCustomInstructions', createCustomInstructions), vscode.commands.registerCommand('brewhand.updateCustomInstructions', updateCustomInstructions), vscode.commands.registerCommand('brewhand.removeCustomInstructions', removeCustomInstructions), vscode.commands.registerCommand('brewhand.viewCustomInstructions', viewCustomInstructions));
+    // Monitor configuration changes for auto-update
+    context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(async (e) => {
+        if (e.affectsConfiguration('brewhand')) {
+            updateStatusBar();
+            // Auto-update custom instructions if enabled
+            const config = vscode.workspace.getConfiguration('brewhand');
+            if (config.get('customInstructions.enabled', false) &&
+                config.get('customInstructions.autoUpdate', false) &&
+                customInstructionsManager.hasCustomInstructions()) {
+                await updateCustomInstructions();
+            }
+        }
+    }));
 }
 /**
- * Update status bar to show Beer Menu
+ * Update status bar display
  */
-function updateStatusBarForIterativeMode() {
+function updateStatusBar() {
     const config = vscode.workspace.getConfiguration('brewhand');
-    const iterativeMode = config.get('enableIterativeSupport', true);
-    let statusText = "🍺 Beer Menu";
-    let tooltip = "BrewHand - Open Beer Menu for features and settings";
-    if (iterativeMode) {
-        tooltip += " | Iterative assistance enabled";
-    }
-    statusBarItem.text = statusText;
-    statusBarItem.tooltip = tooltip;
-    // Change command to open features panel instead of toggling
+    const customInstructionsEnabled = config.get('customInstructions.enabled', false);
+    statusBarItem.text = "🍺 Beer Menu";
+    statusBarItem.tooltip = customInstructionsEnabled
+        ? "BrewHand - Custom Instructions Active | Open Beer Menu"
+        : "BrewHand - Open Beer Menu for features and settings";
     statusBarItem.command = 'brewhand.openFeatures';
 }
 /**
- * Setup monitoring for iterative workflow patterns
+ * Simplified chat participant for basic shell command help
  */
-function setupIterativeWorkflowMonitoring(context) {
-    // Monitor file saves for iterative patterns
-    vscode.workspace.onDidSaveTextDocument((document) => {
-        const config = vscode.workspace.getConfiguration('brewhand');
-        const iterativeSupport = config.get('enableIterativeSupport', true);
-        if (iterativeSupport) {
-            detectIterativePattern(document);
-        }
-    });
-    // Monitor terminal commands
-    let terminalCommandCount = 0;
-    const terminalWatcher = vscode.window.onDidChangeActiveTerminal(() => {
-        terminalCommandCount++;
-        if (terminalCommandCount > 3) {
-            suggestIterativeAssistance('terminal');
-        }
-    });
-    context.subscriptions.push(terminalWatcher);
-}
-/**
- * Toggle iterative mode
- */
-async function toggleIterativeMode() {
-    const config = vscode.workspace.getConfiguration('brewhand');
-    const currentMode = config.get('enableIterativeSupport', true);
-    await config.update('enableIterativeSupport', !currentMode, vscode.ConfigurationTarget.Workspace);
-    // Update UI elements
-    updateStatusBarForIterativeMode();
-    refreshViewProviders();
-    // Show notification
-    const modeText = !currentMode ? 'ENABLED' : 'DISABLED';
-    vscode.window.showInformationMessage(`🍺 BrewHand Iterative Support: ${modeText}`, 'Learn More').then(selection => {
-        if (selection === 'Learn More') {
-            vscode.commands.executeCommand('brewhand.showWorkflowSummary', 'help');
-        }
-    });
-}
-/**
- * Continue a specific workflow
- */
-async function continueWorkflow(sessionId) {
-    if (!sessionId) {
-        vscode.window.showErrorMessage('No active workflow session found.');
-        return;
-    }
-    const context = aiResponseEnhancer.getConversationContext(sessionId);
-    if (context) {
-        vscode.window.showInformationMessage(`🔄 Continuing workflow session ${sessionId.split('-')[1]}...`, 'Open Chat').then(selection => {
-            if (selection === 'Open Chat') {
-                vscode.commands.executeCommand('workbench.panel.chat.view.copilot.focus');
-            }
-        });
-    }
-    else {
-        vscode.window.showWarningMessage('Workflow session not found or expired.');
-    }
-}
-/**
- * Pause a workflow
- */
-async function pauseWorkflow(sessionId) {
-    const config = vscode.workspace.getConfiguration('brewhand');
-    await config.update('continuousAssistanceMode', false, vscode.ConfigurationTarget.Workspace);
-    // Update UI elements
-    updateStatusBarForIterativeMode();
-    refreshViewProviders();
-    vscode.window.showInformationMessage('⏸️ Workflow paused. Use @brewhand to continue when ready.');
-}
-/**
- * Show workflow summary
- */
-async function showWorkflowSummary(sessionId) {
-    if (sessionId === 'help') {
-        // Show help information
-        const helpContent = createIterativeHelpContent();
-        const doc = await vscode.workspace.openTextDocument({
-            content: helpContent,
-            language: 'markdown'
-        });
-        await vscode.window.showTextDocument(doc);
-        return;
-    }
-    const context = aiResponseEnhancer.getConversationContext(sessionId);
-    if (context) {
-        const summaryContent = createWorkflowSummary(context);
-        const doc = await vscode.workspace.openTextDocument({
-            content: summaryContent,
-            language: 'markdown'
-        });
-        await vscode.window.showTextDocument(doc);
-    }
-    else {
-        vscode.window.showWarningMessage('No workflow summary available.');
-    }
-}
-/**
- * Clear workflow history
- */
-async function clearWorkflowHistory() {
-    const response = await vscode.window.showWarningMessage('Clear all workflow history? This cannot be undone.', 'Clear History', 'Cancel');
-    if (response === 'Clear History') {
-        aiResponseEnhancer.clearAllConversations();
-        vscode.window.showInformationMessage('🗑️ Workflow history cleared.');
-    }
-}
-/**
- * Create iterative help content
- */
-function createIterativeHelpContent() {
-    return `# BrewHand Iterative Workflow Support
-
-## What is Iterative Support?
-
-BrewHand's iterative support helps you throughout multi-step development processes by:
-
-1. **Tracking Context**: Remembers your previous requests and patterns
-2. **Continuous Assistance**: Provides ongoing help throughout workflows
-3. **Smart Suggestions**: Recommends next steps based on your activity
-4. **Shell Awareness**: Maintains shell-specific context throughout
-
-## How It Works
-
-### Automatic Detection
-- Monitors file changes for iterative patterns
-- Detects multiple terminal commands
-- Recognizes development workflows
-
-### Iterative Mode
-- Enable with Beer Menu panel or command palette
-- Provides ongoing assistance without repeated @brewhand calls
-- Maintains conversation context across interactions
-
-### Workflow Controls
-- **Continue**: Resume an active workflow
-- **Pause**: Temporarily disable iterative assistance
-- **Summary**: View workflow history and patterns
-
-## Configuration
-
-\`\`\`json
-{
-  "brewhand.enableIterativeSupport": true,
-  "brewhand.showIterativeSuggestions": true
-}
-\`\`\`
-
-## Best Practices
-
-1. **Start with @brewhand** for complex, multi-step tasks
-2. **Enable iterative mode** for long development sessions
-3. **Use workflow controls** to manage assistance level
-4. **Review summaries** to track progress and patterns
-`;
-}
-/**
- * Create workflow summary content
- */
-function createWorkflowSummary(context) {
-    const duration = Math.round((Date.now() - context.startTime) / 1000 / 60);
-    return `# Workflow Summary
-
-**Session ID**: ${context.sessionId}
-**Duration**: ${duration} minutes
-**Workflow Type**: ${context.activeWorkflow}
-**Total Requests**: ${context.previousRequests.length}
-
-## Detected Patterns
-${context.detectedPatterns.map((pattern) => `- ${pattern}`).join('\n')}
-
-## Request History
-${context.previousRequests.map((req, i) => `${i + 1}. ${req}`).join('\n')}
-
-## Shell Context
-- **Type**: ${aiResponseEnhancer.getShellInfo().type}
-- **Separator**: ${aiResponseEnhancer.getShellInfo().separator}
-
-## Recommendations
-Based on this workflow, consider:
-1. Testing the implemented changes
-2. Adding error handling where appropriate
-3. Documenting the process for future reference
-4. Running relevant tests to ensure quality
-`;
-}
-// Main chat participant handler - enhanced for AI response quality
-async function handleBrewHandChat(request, context, stream, token) {
-    try {
-        const shellInfo = commandValidator.getShellInfo();
-        const config = vscode.workspace.getConfiguration('brewhand');
-        const enhancedModeEnabled = config.get('enhancedAIMode', true);
-        // Detect if this is a request that would benefit from enhanced AI responses
-        const needsEnhancedResponse = detectNeedsEnhancement(request.prompt);
-        // Use enhanced AI response for complex requests
-        if (enhancedModeEnabled && needsEnhancedResponse) {
-            return await aiResponseEnhancer.enhanceAIResponse(request.prompt, stream, token, {
-                preventIncorrectSyntax: true,
-                autoCorrectCommands: true,
-                addShellContext: true,
-                includeEducationalTips: true
-            });
-        }
-        // Fall back to command validation mode for simple command fixes
-        return await handleCommandValidation(request, stream, shellInfo);
-    }
-    catch (error) {
-        stream.markdown(`❌ **Error:** ${error instanceof Error ? error.message : 'Unknown error'}\n`);
-        stream.markdown('Please try again or report this issue.\n');
-        return { metadata: { command: 'brewhand' } };
-    }
-}
-// Detect if request needs enhanced AI response
-function detectNeedsEnhancement(prompt) {
-    const enhancementTriggers = [
-        /(?:create|generate|write|build|implement)/i,
-        /(?:how (?:do|to)|show me|example)/i,
-        /(?:script|function|class|component)/i,
-        /(?:setup|configure|install)/i,
-        /(?:deploy|run|start|compile)/i,
-        /(?:test|debug|fix)/i
-    ];
-    return enhancementTriggers.some(pattern => pattern.test(prompt));
-}
-// Handle simple command validation (legacy behavior)
-async function handleCommandValidation(request, stream, shellInfo) {
-    // Enhanced command detection
+async function handleSimplifiedChat(request, context, stream, token) {
+    const shellInfo = commandValidator.getShellInfo();
+    stream.markdown('🍺 **BrewHand Shell Assistant**\n\n');
+    stream.markdown(`🖥️ **Current Shell:** ${shellInfo.type}\n`);
+    stream.markdown(`🔗 **Command Separator:** \`${shellInfo.separator}\`\n\n`);
+    // Check for commands in the request
     const commandPatterns = [
         /(?:cd|npm|yarn|git|tsc|node|python|pip|docker|kubectl)\s+[^\n]+/gi,
-        /[^&;|\n]+(?:&&|;|\|)[^&;|\n]+/gi // Chained commands
+        /[^&;|\n]+(?:&&|;|\|)[^&;|\n]+/gi
     ];
     let detectedCommands = [];
     commandPatterns.forEach(pattern => {
@@ -353,84 +156,52 @@ async function handleCommandValidation(request, stream, shellInfo) {
             detectedCommands.push(...matches);
         }
     });
-    // Check if user is asking for command help
-    const isCommandRequest = /(?:command|shell|terminal|syntax|&&|;|how to|help)/i.test(request.prompt);
-    stream.markdown('🍺 **BrewHand Command Assistant**\n\n');
-    stream.markdown(`🖥️ **Detected Shell:** ${shellInfo.type}\n`);
-    stream.markdown(`🔗 **Correct Separator:** \`${shellInfo.separator}\`\n\n`);
     if (detectedCommands.length > 0) {
-        stream.markdown('**📋 Commands Found & Validated:**\n\n');
+        stream.markdown('**🔍 Command Validation:**\n\n');
         for (const command of detectedCommands) {
             const formatter = new commandFormatter_1.CommandFormatter();
             const validation = formatter.validateSyntax(command.trim());
             stream.markdown(`**Command:** \`${command.trim()}\`\n`);
             if (!validation.valid) {
-                stream.markdown(`❌ **Issues Found:**\n`);
-                validation.issues.forEach(issue => {
-                    stream.markdown(`   - ${issue}\n`);
-                });
+                stream.markdown(`❌ **Issues:** ${validation.issues.join(', ')}\n`);
                 if (validation.fixed) {
                     stream.markdown(`✅ **Corrected:** \`${validation.fixed}\`\n`);
-                    stream.button({
-                        command: 'vscode.env.clipboard.writeText',
-                        arguments: [validation.fixed],
-                        title: '📋 Copy Fixed Command'
-                    });
                 }
             }
             else {
-                stream.markdown(`✅ **Status:** Syntax is correct for ${shellInfo.type}\n`);
+                stream.markdown(`✅ **Status:** Correct for ${shellInfo.type}\n`);
             }
             stream.markdown('\n');
         }
     }
-    // Provide shell-specific syntax help
-    stream.markdown('## 💡 Shell Syntax Guide\n\n');
-    if (shellInfo.type === 'powershell') {
-        stream.markdown('**PowerShell Commands:**\n');
-        stream.markdown('- ✅ Use `;` to chain: `cd project; npm install; npm start`\n');
-        stream.markdown('- ❌ Avoid `&&`: PowerShell uses different conditional logic\n');
-        stream.markdown('- 📁 Quote paths: `cd "My Project"`\n');
-        stream.markdown('- 🔄 Example: `cd "d:\\projects\\app"; npm run compile; npm start`\n\n');
+    else {
+        stream.markdown('💡 **Quick Shell Tips:**\n\n');
+        stream.markdown(`- Use \`${shellInfo.separator}\` to chain commands\n`);
+        stream.markdown(`- Quote paths with spaces using \`${shellInfo.pathQuote}\`\n`);
+        stream.markdown('- Ask me to validate specific commands\n\n');
     }
-    else if (shellInfo.type === 'bash' || shellInfo.type === 'zsh') {
-        stream.markdown('**Bash/Zsh Commands:**\n');
-        stream.markdown('- ✅ Use `&&` for conditional: `cd project && npm install && npm start`\n');
-        stream.markdown('- ⚡ Use `;` for sequential: `cd project; npm install; npm start`\n');
-        stream.markdown('- 📁 Quote paths: `cd "My Project"`\n');
-        stream.markdown('- 🔄 Example: `cd "~/projects/app" && npm run compile && npm start`\n\n');
+    // Promote custom instructions
+    const config = vscode.workspace.getConfiguration('brewhand');
+    const customInstructionsEnabled = config.get('customInstructions.enabled', false);
+    if (!customInstructionsEnabled) {
+        stream.markdown('---\n');
+        stream.markdown('💡 **Pro Tip:** Enable Custom Instructions for enhanced Copilot agent mode!\n');
+        stream.button({
+            command: 'brewhand.createCustomInstructions',
+            title: 'Create Custom Instructions'
+        });
     }
-    else if (shellInfo.type === 'cmd') {
-        stream.markdown('**Command Prompt (CMD):**\n');
-        stream.markdown('- ✅ Use `&` to chain: `cd project & npm install & npm start`\n');
-        stream.markdown('- 📁 Quote paths: `cd "My Project"`\n');
-        stream.markdown('- 🔄 Example: `cd "C:\\projects\\app" & npm run compile & npm start`\n\n');
+    else {
+        stream.markdown('---\n');
+        stream.markdown('✨ **Custom Instructions Active** - Copilot agent mode enhanced with BrewHand quality standards!\n');
     }
-    // Common commands with correct syntax for current shell
-    stream.markdown('## 🚀 Common Development Commands\n\n');
-    stream.markdown(`**Navigation & Build:**\n`);
-    stream.markdown(`\`cd "project-folder"${shellInfo.separator} npm install${shellInfo.separator} npm run build\`\n\n`);
-    stream.markdown(`**Compile & Start:**\n`);
-    stream.markdown(`\`npm run compile${shellInfo.separator} npm start\`\n\n`);
-    stream.markdown(`**Git & Deploy:**\n`);
-    stream.markdown(`\`git add .${shellInfo.separator} git commit -m "update"${shellInfo.separator} git push\`\n\n`);
-    if (isCommandRequest && detectedCommands.length === 0) {
-        stream.markdown('💬 **Ask me about specific commands!** For example:\n');
-        stream.markdown('- "How do I compile and run my project?"\n');
-        stream.markdown('- "Fix this command: cd project && npm start"\n');
-        stream.markdown('- "What\'s the correct syntax for my shell?"\n\n');
-    }
-    stream.markdown('---\n');
-    stream.markdown('**🎯 Pro Tip:** Always verify compilation output before running dependent commands!\n');
-    // Track usage
-    telemetryService.trackEvent('chat_interaction', {
-        shell_type: shellInfo.type,
-        commands_detected: detectedCommands.length,
-        is_command_request: isCommandRequest
-    });
-    return { metadata: { command: 'brewhand' } };
+    return { metadata: { command: 'brewhand-simplified' } };
 }
-// Standalone command validation
+// Core command implementations
+async function detectShell() {
+    const shellInfo = commandValidator.getShellInfo();
+    vscode.window.showInformationMessage(`🔧 Detected Shell: ${shellInfo.type} | Separator: "${shellInfo.separator}"`);
+}
 async function validateCommand() {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -449,7 +220,7 @@ async function validateCommand() {
         vscode.window.showInformationMessage('✅ Command syntax is correct!');
     }
     else {
-        const message = `❌ Issues found: ${validation.issues.join(', ')}`;
+        const message = `❌ Issues: ${validation.issues.join(', ')}`;
         if (validation.fixed) {
             vscode.window.showWarningMessage(message, 'Use Fixed Version').then(response => {
                 if (response === 'Use Fixed Version') {
@@ -464,81 +235,101 @@ async function validateCommand() {
         }
     }
 }
-// Toggle enhanced AI response mode
-async function toggleEnhancedMode() {
-    const config = vscode.workspace.getConfiguration('brewhand');
-    const currentMode = config.get('enhancedAIMode', true);
-    await config.update('enhancedAIMode', !currentMode, vscode.ConfigurationTarget.Global);
-    refreshViewProviders();
-    const modeText = !currentMode ? 'ENABLED' : 'DISABLED';
-    vscode.window.showInformationMessage(`🍺 BrewHand Enhanced AI Mode: ${modeText}`, 'Learn More').then(selection => {
-        if (selection === 'Learn More') {
-            vscode.commands.executeCommand('brewhand.showShellReference');
-        }
-    });
-}
-// Show shell reference card
 async function showShellReference() {
-    const referenceContent = aiResponseEnhancer.createShellReferenceCard();
-    // Create a new untitled document with the reference
+    const shellInfo = commandValidator.getShellInfo();
+    const referenceContent = `# ${shellInfo.type.toUpperCase()} Command Reference
+
+## Command Chaining
+- **Separator:** \`${shellInfo.separator}\`
+- **Example:** \`cmd1${shellInfo.separator}cmd2${shellInfo.separator}cmd3\`
+
+## Path Handling  
+- **Quote Character:** \`${shellInfo.pathQuote}\`
+- **Example:** \`cd ${shellInfo.pathQuote}My Project${shellInfo.pathQuote}\`
+
+## Sample Commands
+\`\`\`${shellInfo.type}
+${shellInfo.exampleCommand}
+\`\`\`
+`;
     const doc = await vscode.workspace.openTextDocument({
         content: referenceContent,
         language: 'markdown'
     });
     await vscode.window.showTextDocument(doc);
 }
-/**
- * Suggest iterative assistance based on detected patterns
- */
-async function suggestIterativeAssistance(trigger) {
+// Custom Instructions Commands
+async function createCustomInstructions() {
     const config = vscode.workspace.getConfiguration('brewhand');
-    const showSuggestions = config.get('showIterativeSuggestions', true);
-    const lastSuggestion = config.get('lastIterativeSuggestion', 0);
-    // Cooldown period to avoid spam
-    if (Date.now() - lastSuggestion < 300000)
-        return; // 5 minutes
-    if (showSuggestions) {
-        const message = trigger === 'terminal'
-            ? '🍺 BrewHand: Detected multiple terminal commands. Enable iterative assistance?'
-            : '🍺 BrewHand: Detected iterative editing. Want help throughout this workflow?';
-        const response = await vscode.window.showInformationMessage(message, 'Enable Iterative Mode', 'Just for this session', 'No thanks');
-        config.update('lastIterativeSuggestion', Date.now(), vscode.ConfigurationTarget.Global);
-        if (response === 'Enable Iterative Mode') {
-            await config.update('enableIterativeSupport', true, vscode.ConfigurationTarget.Workspace);
-            updateStatusBarForIterativeMode();
-            refreshViewProviders();
-            vscode.window.showInformationMessage('🍺 Iterative assistance enabled! BrewHand will help throughout your workflow.');
+    const options = {
+        includeShellContext: config.get('customInstructions.includeShellContext', true),
+        includeQualityStandards: config.get('customInstructions.includeQualityStandards', true),
+        includeArchitecturalGuidance: config.get('customInstructions.includeArchitecturalGuidance', true),
+        strictMode: config.get('strictMode', true)
+    };
+    const success = await customInstructionsManager.createCustomInstructions(options);
+    if (success) {
+        await config.update('customInstructions.enabled', true, vscode.ConfigurationTarget.Workspace);
+        updateStatusBar();
+        vscode.commands.executeCommand('brewhand.refreshViews');
+    }
+}
+async function updateCustomInstructions() {
+    if (!customInstructionsManager.hasCustomInstructions()) {
+        const response = await vscode.window.showInformationMessage('No custom instructions found. Create them?', 'Create', 'Cancel');
+        if (response === 'Create') {
+            await createCustomInstructions();
         }
-        else if (response === 'Just for this session') {
-            await config.update('enableIterativeSupport', true, vscode.ConfigurationTarget.Workspace);
-            updateStatusBarForIterativeMode();
-            refreshViewProviders();
-            vscode.window.showInformationMessage('🍺 Iterative support enabled for this session.');
+        return;
+    }
+    const config = vscode.workspace.getConfiguration('brewhand');
+    const options = {
+        includeShellContext: config.get('customInstructions.includeShellContext', true),
+        includeQualityStandards: config.get('customInstructions.includeQualityStandards', true),
+        includeArchitecturalGuidance: config.get('customInstructions.includeArchitecturalGuidance', true),
+        strictMode: config.get('strictMode', true)
+    };
+    await customInstructionsManager.updateCustomInstructions(options);
+}
+async function removeCustomInstructions() {
+    if (!customInstructionsManager.hasCustomInstructions()) {
+        vscode.window.showWarningMessage('No custom instructions found.');
+        return;
+    }
+    const response = await vscode.window.showWarningMessage('Remove BrewHand custom instructions? This will affect Copilot suggestions.', 'Remove', 'Cancel');
+    if (response === 'Remove') {
+        const success = await customInstructionsManager.removeCustomInstructions();
+        if (success) {
+            const config = vscode.workspace.getConfiguration('brewhand');
+            await config.update('customInstructions.enabled', false, vscode.ConfigurationTarget.Workspace);
+            updateStatusBar();
+            vscode.commands.executeCommand('brewhand.refreshViews');
         }
     }
 }
-/**
- * Detect iterative development patterns
- */
-function detectIterativePattern(document) {
-    // Simplified pattern detection - in practice, this would be more sophisticated
-    const diagnostics = vscode.languages.getDiagnostics(document.uri);
-    // If there are errors, suggest assistance
-    if (diagnostics.length > 0) {
-        suggestIterativeAssistance('file_changes');
+async function viewCustomInstructions() {
+    if (!vscode.workspace.workspaceFolders?.length) {
+        vscode.window.showErrorMessage('No workspace folder found.');
+        return;
     }
-}
-/**
- * Refresh all view providers
- * This function can be called when settings change to update the UI
- */
-function refreshViewProviders() {
-    vscode.commands.executeCommand('brewhand.refreshViews');
+    if (!customInstructionsManager.hasCustomInstructions()) {
+        const response = await vscode.window.showInformationMessage('No custom instructions found. Create them?', 'Create', 'Cancel');
+        if (response === 'Create') {
+            await createCustomInstructions();
+        }
+        return;
+    }
+    const workspaceFolder = vscode.workspace.workspaceFolders[0];
+    const instructionsPath = vscode.Uri.joinPath(workspaceFolder.uri, '.vscode', 'copilot-instructions.md');
+    try {
+        const document = await vscode.workspace.openTextDocument(instructionsPath);
+        await vscode.window.showTextDocument(document);
+    }
+    catch (error) {
+        vscode.window.showErrorMessage(`Failed to open custom instructions: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
 }
 function deactivate() {
-    // Clean up any active conversations
-    if (aiResponseEnhancer) {
-        aiResponseEnhancer.clearAllConversations();
-    }
+    // Cleanup
 }
 //# sourceMappingURL=brewhand-extension.js.map
