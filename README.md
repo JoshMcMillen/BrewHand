@@ -25,11 +25,11 @@
 
 ## ✨ Key Features
 
-### 🎯 **Quality-First AI Development**
-- **Production-ready code generation** with comprehensive error handling and best practices
-- **Architectural guidance** for performance, maintainability, security, and scalability
-- **Multi-language support** for JavaScript, TypeScript, Python, Java, C#, Go, Rust, and more
-- **Complexity analysis** that adapts AI responses to task difficulty
+### 🎯 **Custom Instructions for Copilot Agent Mode** ⭐ **NEW**
+- **Automatic custom instructions generation** that enhances GitHub Copilot's agent mode (inline suggestions)
+- **Shell-aware code generation** with platform-specific command syntax
+- **Production-ready standards** built into every Copilot suggestion
+- **Quality-first development** with comprehensive error handling and best practices
 
 ### 🐚 **Intelligent Shell Command System**
 - **Automatic shell detection** (PowerShell, CMD, Bash, Zsh) with platform-specific formatting
@@ -37,12 +37,10 @@
 - **Cross-platform compatibility** ensuring commands work on your specific environment
 - **Error prevention** with proactive syntax checking and educational tips
 
-### 🧠 **Smart AI Chat Integration**
-- **@brewhand chat participant** integrated directly into VS Code's chat interface
-- **Iterative workflow support** - Maintains context throughout multi-step development processes
-- **Context-aware conversations** that understand your project structure and coding patterns
-- **Enhanced AI responses** with shell-aware command generation and validation
-- **Educational integration** - Learn best practices while you code
+### 💬 **Simplified AI Chat Integration**
+- **@brewhand chat participant** for quick shell command validation
+- **Shell-aware responses** with command syntax checking
+- **Educational tips** and best practices for your specific shell environment
 
 ### 🔍 **Code Quality & Analysis Tools**  
 - **Import path resolution** with automatic error detection and intelligent suggestions
@@ -83,42 +81,39 @@ Should return: `brewcode.brewhand`
 2. **Check Beer Menu** - Look for the 🍺 icon in your status bar
 3. **Command Palette** - Press `Ctrl+Shift+P` and search "BrewHand" to see available commands
 
-## 🍺 Getting Started
+## 🚀 Getting Started
 
-### Open the Beer Menu
-Click the **🍺 Beer Menu** in your status bar to access:
-- **Features Panel** - Toggle core functionality on/off
-- **Quick Settings** - Configure BrewHand behavior
-- **Help & Documentation** - Learn more about available features
+### 🎯 **Enable Custom Instructions (Recommended)**
+1. **Open Beer Menu** - Click the 🍺 icon in your status bar
+2. **Enable Custom Instructions** - Toggle the "Custom Instructions" feature
+3. **Enjoy Enhanced Copilot** - All Copilot suggestions now use BrewHand quality standards!
 
 ### Using @brewhand in Chat
 1. Open VS Code Chat panel (`Ctrl+Shift+I`)
-2. Type `@brewhand` followed by your request
-3. Ask for shell commands, code generation, or architectural advice
-4. BrewHand will provide validated, production-ready responses
+2. Type `@brewhand` followed by your shell command question
+3. Get validated, platform-specific command syntax
+4. Learn best practices for your shell environment
 
 ### Key Features to Try
-- **Shell Commands**: Ask for platform-specific terminal commands
-- **Code Generation**: Request production-ready code with error handling  
-- **Error Analysis**: Get help understanding and fixing compilation errors
-- **Architecture Advice**: Ask about best practices and design patterns
+- **Custom Instructions**: Enable for enhanced Copilot agent mode suggestions
+- **Shell Commands**: Ask @brewhand for platform-specific terminal commands
+- **Command Validation**: Use `Ctrl+Shift+Q` to validate selected commands
+- **Shell Reference**: Get syntax help for your current shell environment
 
 ## 🎛️ Available Commands
 
-BrewHand provides 11 focused commands accessible via Command Palette (`Ctrl+Shift+P`):
+BrewHand provides 8 focused commands accessible via Command Palette (`Ctrl+Shift+P`):
 
-### Core Shell & AI Commands
+### Core Shell Commands
 - **BrewHand: Detect Current Shell** - Identify your shell environment
 - **BrewHand: Validate Command Syntax** - Check shell command syntax (`Ctrl+Shift+Q`)
-- **BrewHand: Toggle Enhanced AI Mode** - Enable/disable advanced AI responses
 - **BrewHand: Show Shell Reference** - Display shell syntax reference guide
 
-### Workflow Management
-- **BrewHand: Toggle Iterative Support** - Enable continuous workflow assistance (`Ctrl+Shift+G`)
-- **BrewHand: Continue Workflow** - Resume an active development workflow
-- **BrewHand: Pause Workflow** - Temporarily pause iterative assistance
-- **BrewHand: Show Workflow Summary** - View current workflow context and history
-- **BrewHand: Clear Workflow History** - Reset all workflow memory
+### Custom Instructions Management
+- **BrewHand: Create Custom Instructions** - Generate custom instructions for Copilot agent mode
+- **BrewHand: Update Custom Instructions** - Refresh instructions with current settings  
+- **BrewHand: View Custom Instructions** - Open and edit the generated instructions file
+- **BrewHand: Remove Custom Instructions** - Remove custom instructions from workspace
 
 ### Interface & Settings
 - **BrewHand: Open Features Panel** - Access the Beer Menu features panel
@@ -128,16 +123,18 @@ BrewHand provides 11 focused commands accessible via Command Palette (`Ctrl+Shif
 
 BrewHand works great with default settings, but you can customize behavior through:
 
-### Settings Options
-- **Iterative Support** - Enable continuous workflow assistance (default: enabled)
-- **Shell Detection** - Automatic or manual shell type selection
-- **Strict Mode** - Enforce production-ready code standards
+### Key Settings
+- **Custom Instructions** - Enable enhanced Copilot agent mode (recommended)
+- **Strict Mode** - Enforce production-ready code standards (default: enabled)
 - **Architectural Focus** - Prioritize performance, maintainability, security, or balanced approach
+- **Shell Detection** - Automatic or manual shell type selection
+- **Auto-Update Instructions** - Automatically refresh custom instructions when settings change
 
 ### Access Settings
 1. Click **🍺 Beer Menu** in status bar
-2. Open **Quick Settings** panel
-3. Toggle features or click settings to modify values
+2. Open **Features** panel to toggle key features
+3. Open **Quick Settings** panel to modify configuration values
+4. Use Command Palette for additional BrewHand commands
 
 ## 🎯 Best Practices
 

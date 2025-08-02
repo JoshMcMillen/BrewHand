@@ -53,31 +53,6 @@
         "category": "BrewHand"
       },
       {
-        "command": "brewhand.toggleIterativeMode",
-        "title": "BrewHand: Toggle Iterative Support",
-        "category": "BrewHand"
-      },
-      {
-        "command": "brewhand.continueWorkflow",
-        "title": "BrewHand: Continue Workflow",
-        "category": "BrewHand"
-      },
-      {
-        "command": "brewhand.pauseWorkflow",
-        "title": "BrewHand: Pause Workflow",
-        "category": "BrewHand"
-      },
-      {
-        "command": "brewhand.showWorkflowSummary",
-        "title": "BrewHand: Show Workflow Summary",
-        "category": "BrewHand"
-      },
-      {
-        "command": "brewhand.clearWorkflowHistory",
-        "title": "BrewHand: Clear Workflow History",
-        "category": "BrewHand"
-      },
-      {
         "command": "brewhand.openFeatures",
         "title": "BrewHand: Open Features Panel",
         "category": "BrewHand"
@@ -97,6 +72,26 @@
         "command": "brewhand.refreshViews",
         "title": "Refresh",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "brewhand.createCustomInstructions",
+        "title": "BrewHand: Create Custom Instructions",
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.updateCustomInstructions",
+        "title": "BrewHand: Update Custom Instructions", 
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.removeCustomInstructions",
+        "title": "BrewHand: Remove Custom Instructions",
+        "category": "BrewHand"
+      },
+      {
+        "command": "brewhand.viewCustomInstructions",
+        "title": "BrewHand: View Custom Instructions",
+        "category": "BrewHand"
       }
     ],"viewsContainers": {
       "activitybar": [
@@ -141,25 +136,22 @@
           "command": "brewhand.showShellReference"
         },
         {
-          "command": "brewhand.toggleIterativeMode"
-        },
-        {
-          "command": "brewhand.continueWorkflow"
-        },
-        {
-          "command": "brewhand.pauseWorkflow"
-        },
-        {
-          "command": "brewhand.showWorkflowSummary"
-        },
-        {
-          "command": "brewhand.clearWorkflowHistory"
-        },
-        {
           "command": "brewhand.openFeatures"
         },
         {
           "command": "brewhand.openSettings"
+        },
+        {
+          "command": "brewhand.createCustomInstructions"
+        },
+        {
+          "command": "brewhand.updateCustomInstructions"
+        },
+        {
+          "command": "brewhand.removeCustomInstructions"
+        },
+        {
+          "command": "brewhand.viewCustomInstructions"
         }
       ],
       "view/title": [
@@ -191,11 +183,6 @@
         "key": "ctrl+shift+q",
         "mac": "cmd+shift+q",
         "when": "editorTextFocus"
-      },
-      {
-        "command": "brewhand.toggleIterativeMode",
-        "key": "ctrl+shift+g",
-        "mac": "cmd+shift+g"
       }
     ],
     "configuration": {
@@ -246,86 +233,30 @@
           "default": true,
           "description": "Automatically detect and fix shell command syntax errors for your current shell environment (PowerShell, Bash, etc.)"
         },
-        "brewhand.blockOnCompileErrors": {
-          "type": "boolean",
-          "default": true,
-          "description": "Prevent running commands that depend on compilation when build errors are detected to avoid cascading failures"
-        },
-        "brewhand.showCommandCorrections": {
-          "type": "boolean",
-          "default": true,
-          "description": "Display command syntax corrections and alternatives before executing commands to help you learn proper shell syntax"
-        },
-        "brewhand.monitorTerminalCommands": {
-          "type": "boolean",
-          "default": true,
-          "description": "Actively monitor your terminal for shell syntax errors and provide real-time suggestions to fix command issues"
-        },
-        "brewhand.verifyImportPaths": {
-          "type": "boolean",
-          "default": true,
-          "description": "Validate and auto-correct import paths in your code to prevent module resolution errors and broken dependencies"
-        },        "brewhand.autoModeEnabled": {
+        "brewhand.customInstructions.enabled": {
           "type": "boolean",
           "default": false,
-          "description": "Enable BrewHand reminder in status bar to use @brewhand in chat"
+          "description": "Enable automatic custom instructions generation for Copilot agent mode"
         },
-        "brewhand.alwaysActive": {
+        "brewhand.customInstructions.includeShellContext": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include shell-specific command syntax guidelines in custom instructions"
+        },
+        "brewhand.customInstructions.includeQualityStandards": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include BrewHand quality standards and best practices in custom instructions"
+        },
+        "brewhand.customInstructions.includeArchitecturalGuidance": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include architectural guidance based on your focus setting in custom instructions"
+        },
+        "brewhand.customInstructions.autoUpdate": {
           "type": "boolean",
           "default": false,
-          "description": "Make BrewHand always active and monitor for opportunities to help"
-        },
-        "brewhand.showAutoSuggestions": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show automatic suggestions when BrewHand can help with commands"
-        },
-        "brewhand.showReminders": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show periodic reminders to use @brewhand for better commands"
-        },        "brewhand.lastReminderTime": {
-          "type": "number",
-          "default": 0,
-          "description": "Internal: Last time a reminder was shown"
-        },
-        "brewhand.enhancedAIMode": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable advanced AI responses that understand your shell environment and generate platform-specific, syntactically correct commands"
-        },
-        "brewhand.preventIncorrectSyntax": {
-          "type": "boolean",
-          "default": true,
-          "description": "Proactively prevent AI from generating shell commands with incorrect syntax by injecting shell-specific context into AI requests"
-        },
-        "brewhand.autoCorrectCommands": {
-          "type": "boolean",
-          "default": true,
-          "description": "Automatically validate and correct shell commands generated by AI to ensure they work correctly in your environment"
-        },        "brewhand.includeEducationalTips": {
-          "type": "boolean",
-          "default": true,
-          "description": "Include helpful educational tips and best practices specific to your shell environment in AI responses to improve your command-line skills"
-        },
-        "brewhand.enableIterativeSupport": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable intelligent workflow assistance that remembers context across multiple steps and provides continuous help throughout complex development tasks"        },
-        "brewhand.showIterativeSuggestions": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show helpful suggestions to enable iterative assistance when BrewHand detects you're working on multi-step development patterns"
-        },
-        "brewhand.lastIterativeSuggestion": {
-          "type": "number",
-          "default": 0,
-          "description": "Internal: Last time an iterative suggestion was shown"
-        },
-        "brewhand.workflowTimeout": {
-          "type": "number",
-          "default": 7200000,
-          "description": "Time in milliseconds after which workflow contexts expire (default: 2 hours)"
+          "description": "Automatically update custom instructions when BrewHand settings change"
         }
       }
     }

@@ -42,19 +42,13 @@ export class BrewHandTreeItem extends vscode.TreeItem {
 
 export class FeaturesProvider implements vscode.TreeDataProvider<BrewHandTreeItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<BrewHandTreeItem | undefined | null | void> = new vscode.EventEmitter<BrewHandTreeItem | undefined | null | void>();
-    readonly onDidChangeTreeData: vscode.Event<BrewHandTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;    private features: FeatureItem[] = [        {
-            label: 'Iterative Mode',
-            description: 'Context-aware workflow assistance',
-            enabled: vscode.workspace.getConfiguration('brewhand').get('enableIterativeSupport', true),
-            configKey: 'brewhand.enableIterativeSupport',
-            tooltip: 'Enable intelligent workflow assistance that remembers context across multiple steps and provides continuous help throughout complex development tasks'
-        },
+    readonly onDidChangeTreeData: vscode.Event<BrewHandTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;    private features: FeatureItem[] = [
         {
-            label: 'Auto Mode Reminder',
-            description: 'Chat usage reminders',
-            enabled: vscode.workspace.getConfiguration('brewhand').get('autoModeEnabled', false),
-            configKey: 'brewhand.autoModeEnabled',
-            tooltip: 'Show periodic reminders in status bar to use @brewhand for enhanced code generation and quality assistance'
+            label: 'Custom Instructions',
+            description: 'Copilot agent mode enhancement',
+            enabled: vscode.workspace.getConfiguration('brewhand').get('customInstructions.enabled', false),
+            configKey: 'brewhand.customInstructions.enabled',
+            tooltip: 'Generate custom instructions file to enhance Copilot agent mode with BrewHand quality standards and shell awareness'
         },
         {
             label: 'Strict Mode',
@@ -71,12 +65,6 @@ export class FeaturesProvider implements vscode.TreeDataProvider<BrewHandTreeIte
             tooltip: 'Automatically suggest unit tests and testing strategies when generating code to improve code reliability and maintainability'
         },
         {
-            label: 'Shell Command Monitoring',
-            description: 'Real-time terminal error detection',
-            enabled: vscode.workspace.getConfiguration('brewhand').get('monitorTerminalCommands', true),
-            configKey: 'brewhand.monitorTerminalCommands',
-            tooltip: 'Actively monitor your terminal for shell syntax errors and provide real-time suggestions to fix command issues'
-        },        {
             label: 'Auto Fix Shell Syntax',
             description: 'Smart command syntax correction',
             enabled: vscode.workspace.getConfiguration('brewhand').get('autoFixShellSyntax', true),
@@ -134,13 +122,7 @@ export class FeaturesProvider implements vscode.TreeDataProvider<BrewHandTreeIte
 
 export class SettingsProvider implements vscode.TreeDataProvider<BrewHandTreeItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<BrewHandTreeItem | undefined | null | void> = new vscode.EventEmitter<BrewHandTreeItem | undefined | null | void>();
-    readonly onDidChangeTreeData: vscode.Event<BrewHandTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;    private settings: SettingItem[] = [        {
-            label: 'Iterative Assistance',
-            description: 'Intelligent workflow support with context memory',
-            value: vscode.workspace.getConfiguration('brewhand').get('enableIterativeSupport', true),
-            configKey: 'brewhand.enableIterativeSupport',
-            type: 'boolean'
-        },
+    readonly onDidChangeTreeData: vscode.Event<BrewHandTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;    private settings: SettingItem[] = [
         {
             label: 'Architectural Focus',
             description: 'Primary principle for code generation',
@@ -156,6 +138,13 @@ export class SettingsProvider implements vscode.TreeDataProvider<BrewHandTreeIte
             configKey: 'brewhand.shellDetection',
             type: 'enum',
             options: ['auto', 'powershell', 'cmd', 'bash', 'zsh']
+        },
+        {
+            label: 'Auto-Update Instructions',
+            description: 'Automatically update custom instructions when settings change',
+            value: vscode.workspace.getConfiguration('brewhand').get('customInstructions.autoUpdate', false),
+            configKey: 'brewhand.customInstructions.autoUpdate',
+            type: 'boolean'
         }
     ];
 
